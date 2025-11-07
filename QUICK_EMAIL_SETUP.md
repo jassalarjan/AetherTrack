@@ -9,7 +9,7 @@
 ### 2. Generate App Password
 - Visit: https://myaccount.google.com/apppasswords
 - Select: **Mail** → **Other (Custom name)**
-- Name: `AetherTrack`
+- Name: `TaskFlow`
 - Click **Generate**
 - **Copy the 16-character password**
 

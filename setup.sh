@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# AetherTrack Setup Script
-# This script helps you set up the AetherTrack application
+# TaskFlow Setup Script
+# This script helps you set up the TaskFlow application
 
 echo "╔════════════════════════════════════════╗"
-echo "║   AetherTrack - Setup Script             ║"
+echo "║   TaskFlow - Setup Script             ║"
 echo "╚════════════════════════════════════════╝"
 echo ""
 

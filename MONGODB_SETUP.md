@@ -2,7 +2,7 @@
 
 ## ⚠️ Critical: IP Whitelist Configuration
 
-Your AetherTrack application is **fully implemented and ready**, but needs MongoDB Atlas network configuration.
+Your TaskFlow application is **fully implemented and ready**, but needs MongoDB Atlas network configuration.
 
 ## 🔧 Fix MongoDB Connection (Takes 2 minutes)
 
@@ -75,7 +75,7 @@ Once MongoDB is connected:
 5. **Real-time notifications** work
 6. **All features** are fully functional
 
-## 🚀 Start Using AetherTrack
+## 🚀 Start Using TaskFlow
 
 ```bash
 # Terminal 1: Start Backend
@@ -95,7 +95,7 @@ Then visit: `http://localhost:3000`
 2. Click "Register here"
 3. Fill in the form:
    - Full Name: Admin User
-   - Email: admin@AetherTrack.com
+   - Email: admin@taskflow.com
    - Role: Admin
    - Password: admin123
 4. Click "Create Account"
@@ -137,7 +137,7 @@ https://cloud.mongodb.com/
 
 **Your Connection String:**
 ```
-mongodb+srv://jassalarjansingh_db_user:waheguru@AetherTrack.rsodja4.mongodb.net/?appName=AetherTrack
+mongodb+srv://jassalarjansingh_db_user:waheguru@taskflow.rsodja4.mongodb.net/?appName=TaskFlow
 ```
 
 **Backend Port:** 5000
@@ -145,4 +145,4 @@ mongodb+srv://jassalarjansingh_db_user:waheguru@AetherTrack.rsodja4.mongodb.net/
 
 ---
 
-**That's it! Your AetherTrack CTMS is ready to use! 🎉**
+**That's it! Your TaskFlow CTMS is ready to use! 🎉**

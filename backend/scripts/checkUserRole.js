@@ -7,7 +7,7 @@ dotenv.config();
 
 const checkUserRole = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/AetherTrack');
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/taskflow');
     console.log('✅ Connected to MongoDB\n');
 
     // Get all users with their roles

@@ -1,7 +1,7 @@
 # Comprehensive Reporting System Guide
 
 ## Overview
-AetherTrack now features a comprehensive reporting system with visual analytics, professional PDF reports, and time-period filtering.
+TaskFlow now features a comprehensive reporting system with visual analytics, professional PDF reports, and time-period filtering.
 
 ## Features
 
@@ -132,14 +132,14 @@ Click the green **"Export Excel"** button on either Dashboard or Analytics page 
 - 🔴 Urgent
 
 ## File Naming Convention
-- PDF: `AetherTrack_[Period]_Report_YYYY-MM-DD.pdf`
+- PDF: `TaskFlow_[Period]_Report_YYYY-MM-DD.pdf`
   - Examples:
-    - `AetherTrack_Daily_Report_2025-01-31.pdf`
-    - `AetherTrack_Weekly_Report_2025-01-31.pdf`
-    - `AetherTrack_Monthly_Report_2025-01-31.pdf`
-    - `AetherTrack_Full_Report_2025-01-31.pdf`
+    - `TaskFlow_Daily_Report_2025-01-31.pdf`
+    - `TaskFlow_Weekly_Report_2025-01-31.pdf`
+    - `TaskFlow_Monthly_Report_2025-01-31.pdf`
+    - `TaskFlow_Full_Report_2025-01-31.pdf`
 
-- Excel: `AetherTrack_Report_YYYY-MM-DD.xlsx`
+- Excel: `TaskFlow_Report_YYYY-MM-DD.xlsx`
 
 ## Technical Details
 

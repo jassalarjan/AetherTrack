@@ -1,4 +1,4 @@
-# 🌐 AetherTrack - Access Guide
+# 🌐 TaskFlow - Access Guide
 
 ## ✅ Application Status
 
@@ -39,7 +39,7 @@ curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "full_name": "Test Admin",
-    "email": "admin@AetherTrack.com",
+    "email": "admin@taskflow.com",
     "password": "admin123",
     "role": "admin"
   }'
@@ -92,7 +92,7 @@ See `MONGODB_SETUP.md` for detailed instructions.
 2. **Click "Register here"**
 3. **Create an admin account:**
    - Full Name: Admin User
-   - Email: admin@AetherTrack.com  
+   - Email: admin@taskflow.com  
    - Password: admin123
    - Role: Admin
 4. **Start exploring!**
@@ -171,7 +171,7 @@ supervisorctl restart all
 
 ## 🎉 You're All Set!
 
-Your AetherTrack application is fully deployed and running!
+Your TaskFlow application is fully deployed and running!
 
 **Next step:** Configure MongoDB Atlas, then start using the application through the preview!
 

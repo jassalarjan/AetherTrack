@@ -149,10 +149,10 @@ const Navbar = () => {
             >
               <img 
                 src="/logo.png" 
-                alt="AetherTrack Logo" 
+                alt="TaskFlow Logo" 
                 className={`${isCollapsed ? 'w-10 h-10' : 'w-12 h-12'} object-contain transition-all`}
               />
-              {!isCollapsed && <span className={`text-2xl font-bold ${currentTheme.text}`}>AetherTrack</span>}
+              {!isCollapsed && <span className={`text-2xl font-bold ${currentTheme.text}`}>TaskFlow</span>}
             </Link>
 
             {/* Collapse Toggle Button */}

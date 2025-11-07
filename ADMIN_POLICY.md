@@ -3,7 +3,7 @@
 ## 🔐 Admin User Policy
 
 ### Admin Users are Super Users
-Admin users in AetherTrack are **super users** with system-wide privileges. They operate across all teams and should not be assigned to specific teams.
+Admin users in TaskFlow are **super users** with system-wide privileges. They operate across all teams and should not be assigned to specific teams.
 
 ### Key Rules:
 

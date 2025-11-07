@@ -21,7 +21,7 @@ const getCredentialEmailTemplate = (fullName, email, password, appUrl) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome to AetherTrack</title>
+  <title>Welcome to TaskFlow</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -187,7 +187,7 @@ const getCredentialEmailTemplate = (fullName, email, password, appUrl) => {
 <body>
   <div class="container">
     <div class="header">
-      <h1>🚀 Welcome to AetherTrack</h1>
+      <h1>🚀 Welcome to TaskFlow</h1>
       <p>Your account has been created successfully</p>
     </div>
     
@@ -197,7 +197,7 @@ const getCredentialEmailTemplate = (fullName, email, password, appUrl) => {
       </div>
       
       <div class="message">
-        <p>Welcome to <strong>AetherTrack</strong> - your collaborative task management platform! Your account has been successfully created by an administrator.</p>
+        <p>Welcome to <strong>TaskFlow</strong> - your collaborative task management platform! Your account has been successfully created by an administrator.</p>
         <p>You can now access the platform and start collaborating with your team on tasks and projects.</p>
       </div>
 
@@ -218,7 +218,7 @@ const getCredentialEmailTemplate = (fullName, email, password, appUrl) => {
       </div>
 
       <div class="button-container">
-        <a href="${appUrl}" class="btn">Login to AetherTrack</a>
+        <a href="${appUrl}" class="btn">Login to TaskFlow</a>
       </div>
 
       <div class="divider"></div>
@@ -264,10 +264,10 @@ const getCredentialEmailTemplate = (fullName, email, password, appUrl) => {
     </div>
 
     <div class="footer">
-      <p><strong>AetherTrack</strong> - Collaborative Task Management System</p>
+      <p><strong>TaskFlow</strong> - Collaborative Task Management System</p>
       <p>This is an automated email. Please do not reply to this message.</p>
       <p style="margin-top: 15px;">
-        <a href="${appUrl}">Visit AetherTrack</a>
+        <a href="${appUrl}">Visit TaskFlow</a>
       </p>
     </div>
   </div>
@@ -284,15 +284,15 @@ export const sendCredentialEmail = async (fullName, email, password) => {
 
     const mailOptions = {
       from: {
-        name: 'AetherTrack',
+        name: 'TaskFlow',
         address: process.env.EMAIL_USER
       },
       to: email,
-      subject: '🎉 Welcome to AetherTrack - Your Account Credentials',
+      subject: '🎉 Welcome to TaskFlow - Your Account Credentials',
       html: getCredentialEmailTemplate(fullName, email, password, appUrl),
       // Plain text fallback
       text: `
-Welcome to AetherTrack!
+Welcome to TaskFlow!
 
 Hi ${fullName},
 
@@ -306,7 +306,7 @@ Please login at: ${appUrl}
 For security, please change your password after your first login.
 
 Best regards,
-AetherTrack Team
+TaskFlow Team
       `.trim()
     };
 
@@ -327,11 +327,11 @@ export const sendPasswordResetEmail = async (fullName, email, newPassword) => {
 
     const mailOptions = {
       from: {
-        name: 'AetherTrack',
+        name: 'TaskFlow',
         address: process.env.EMAIL_USER
       },
       to: email,
-      subject: '🔑 AetherTrack - Password Reset',
+      subject: '🔑 TaskFlow - Password Reset',
       html: `
 <!DOCTYPE html>
 <html lang="en">
@@ -456,12 +456,12 @@ export const sendPasswordResetEmail = async (fullName, email, newPassword) => {
       </div>
 
       <div class="button-container">
-        <a href="${appUrl}" class="btn">Login to AetherTrack</a>
+        <a href="${appUrl}" class="btn">Login to TaskFlow</a>
       </div>
     </div>
 
     <div class="footer">
-      <p><strong>AetherTrack</strong> - Collaborative Task Management System</p>
+      <p><strong>TaskFlow</strong> - Collaborative Task Management System</p>
       <p>This is an automated email. Please do not reply to this message.</p>
     </div>
   </div>
@@ -483,7 +483,7 @@ Please login at: ${appUrl}
 Important: Please change this password immediately after logging in.
 
 Best regards,
-AetherTrack Team
+TaskFlow Team
       `.trim()
     };
 

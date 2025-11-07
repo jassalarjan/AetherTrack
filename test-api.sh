@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# AetherTrack API Test Script
+# TaskFlow API Test Script
 # This script tests the backend API endpoints
 
 echo "╔════════════════════════════════════════╗"
-echo "║   AetherTrack - API Test Script          ║"
+echo "║   TaskFlow - API Test Script          ║"
 echo "╚════════════════════════════════════════╝"
 echo ""
 
@@ -36,7 +36,7 @@ register_response=$(curl -s -w "\n%{http_code}" -X POST $BASE_URL/auth/register 
   -H "Content-Type: application/json" \
   -d '{
     "full_name": "Test Admin",
-    "email": "testadmin@AetherTrack.com",
+    "email": "testadmin@taskflow.com",
     "password": "admin123",
     "role": "admin"
   }')
@@ -59,7 +59,7 @@ elif [ "$http_code" = "400" ]; then
     login_response=$(curl -s -w "\n%{http_code}" -X POST $BASE_URL/auth/login \
       -H "Content-Type: application/json" \
       -d '{
-        "email": "testadmin@AetherTrack.com",
+        "email": "testadmin@taskflow.com",
         "password": "admin123"
       }')
     
@@ -147,10 +147,10 @@ if [ -n "$ACCESS_TOKEN" ]; then
     echo "✅ Authentication is functional"
     echo "✅ Database operations are working"
     echo ""
-    echo -e "${GREEN}🎉 All tests passed! Your AetherTrack CTMS is ready to use!${NC}"
+    echo -e "${GREEN}🎉 All tests passed! Your TaskFlow CTMS is ready to use!${NC}"
     echo ""
     echo "🌐 Visit: http://localhost:3000"
-    echo "📧 Login with: testadmin@AetherTrack.com / admin123"
+    echo "📧 Login with: testadmin@taskflow.com / admin123"
 else
     echo ""
     echo -e "${YELLOW}⚠️  Database connection issue detected${NC}"

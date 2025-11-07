@@ -38,11 +38,11 @@ const Login = () => {
           <div className="flex justify-center mb-4">
             <img 
               src="/logo.png" 
-              alt="TaskFlow Logo" 
+              alt="AetherTrack Logo" 
               className="w-16 h-16 object-contain"
             />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">TaskFlow</h1>
+          <h1 className="text-3xl font-bold text-gray-900">AetherTrack</h1>
           <p className="text-gray-600 mt-2">Community Task Management System</p>
         </div>
 

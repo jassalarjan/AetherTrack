@@ -1,9 +1,9 @@
-# TaskFlow Reporting - Quick Reference
+# AetherTrack Reporting - Quick Reference
 
 ## 🎯 What's New?
 
 ### Professional PDF Reports with Visual Analytics
-Your TaskFlow reports now include:
+Your AetherTrack reports now include:
 - 📊 **Visual Charts** (pie charts, bar charts, KPI boxes)
 - 📑 **Comprehensive Tables** (status, priority, teams, users, overdue tasks)
 - 🎨 **Professional Cover Page** (branded, with report metadata)
@@ -31,7 +31,7 @@ Your TaskFlow reports now include:
 ## 📄 PDF Report Structure
 
 ### Page 1: Professional Cover
-- TaskFlow branding
+- AetherTrack branding
 - Report type and period
 - Generation date and user
 - Total tasks analyzed
@@ -110,11 +110,11 @@ Your TaskFlow reports now include:
 
 Reports are saved with descriptive names:
 ```
-TaskFlow_Daily_Report_2025-01-31.pdf
-TaskFlow_Weekly_Report_2025-01-31.pdf
-TaskFlow_Monthly_Report_2025-01-31.pdf
-TaskFlow_Full_Report_2025-01-31.pdf
-TaskFlow_Report_2025-01-31.xlsx
+AetherTrack_Daily_Report_2025-01-31.pdf
+AetherTrack_Weekly_Report_2025-01-31.pdf
+AetherTrack_Monthly_Report_2025-01-31.pdf
+AetherTrack_Full_Report_2025-01-31.pdf
+AetherTrack_Report_2025-01-31.xlsx
 ```
 
 ---

@@ -1,4 +1,4 @@
-# TaskFlow - Community Task Management System
+# AetherTrack - Community Task Management System
 
 A comprehensive, role-based task management system built with **Node.js**, **Express**, **MongoDB**, **React**, and **Socket.IO**.
 
@@ -29,7 +29,7 @@ A comprehensive, role-based task management system built with **Node.js**, **Exp
 ## 🏗️ Architecture
 
 ```
-TaskFlow/
+AetherTrack/
 ├── backend/              # Node.js + Express API
 │   ├── config/          # Database configuration
 │   ├── models/          # Mongoose schemas
@@ -164,22 +164,22 @@ Content-Type: application/json
 # Register Admin
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"full_name":"Admin User","email":"admin@taskflow.com","password":"admin123","role":"admin"}'
+  -d '{"full_name":"Admin User","email":"admin@AetherTrack.com","password":"admin123","role":"admin"}'
 
 # Register HR
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"full_name":"HR Manager","email":"hr@taskflow.com","password":"hr123","role":"hr"}'
+  -d '{"full_name":"HR Manager","email":"hr@AetherTrack.com","password":"hr123","role":"hr"}'
 
 # Register Team Lead
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"full_name":"Team Lead","email":"lead@taskflow.com","password":"lead123","role":"team_lead"}'
+  -d '{"full_name":"Team Lead","email":"lead@AetherTrack.com","password":"lead123","role":"team_lead"}'
 
 # Register Member
 curl -X POST http://localhost:5000/api/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"full_name":"Team Member","email":"member@taskflow.com","password":"member123","role":"member"}'
+  -d '{"full_name":"Team Member","email":"member@AetherTrack.com","password":"member123","role":"member"}'
 ```
 
 ## 🔧 Current Status

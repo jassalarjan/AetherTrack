@@ -1,9 +1,9 @@
-# TaskFlow - Complete Project Structure
+# AetherTrack - Complete Project Structure
 
 ## 📁 Project Overview
 
 ```
-TaskFlow/
+AetherTrack/
 ├── backend/                      # Node.js + Express Backend
 │   ├── config/
 │   │   └── db.js                # MongoDB connection configuration

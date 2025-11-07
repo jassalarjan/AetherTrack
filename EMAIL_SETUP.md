@@ -1,7 +1,7 @@
 # Email Service Setup Guide
 
 ## Overview
-The TaskFlow application now includes automated email notifications for user account creation and password resets using **Nodemailer** with beautiful HTML templates.
+The AetherTrack application now includes automated email notifications for user account creation and password resets using **Nodemailer** with beautiful HTML templates.
 
 ## Features
 
@@ -75,7 +75,7 @@ If using Gmail, you **must** use an App Password (not your regular password):
 2. **Generate App Password**
    - Visit [App Passwords](https://myaccount.google.com/apppasswords)
    - Select "Mail" and "Other (Custom name)"
-   - Name it "TaskFlow" or "Nodemailer"
+   - Name it "AetherTrack" or "Nodemailer"
    - Click "Generate"
    - Copy the 16-character password (remove spaces)
 

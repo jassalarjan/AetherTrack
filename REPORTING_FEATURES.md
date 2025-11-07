@@ -1,7 +1,7 @@
-# TaskFlow Reporting Features Documentation
+# AetherTrack Reporting Features Documentation
 
 ## Overview
-TaskFlow now includes comprehensive reporting capabilities with high-quality Excel and PDF exports featuring detailed tables and analytics.
+AetherTrack now includes comprehensive reporting capabilities with high-quality Excel and PDF exports featuring detailed tables and analytics.
 
 ## Features Implemented
 
@@ -109,14 +109,14 @@ frontend/src/
 - Creates multi-sheet Excel workbook
 - Auto-formats columns and applies proper widths
 - Calculates derived metrics (days overdue, completion rates)
-- Filename: `TaskFlow_Report_YYYY-MM-DD.xlsx`
+- Filename: `AetherTrack_Report_YYYY-MM-DD.xlsx`
 
 #### `generatePDFReport(tasks, analyticsData, filters, user)`
 - Generates multi-page PDF with tables
 - Uses jsPDF AutoTable for professional formatting
 - Includes headers, footers, and page numbers
 - Color-coded sections for visual clarity
-- Filename: `TaskFlow_Report_YYYY-MM-DD.pdf`
+- Filename: `AetherTrack_Report_YYYY-MM-DD.pdf`
 
 ## User Interface
 
@@ -257,4 +257,4 @@ All exports respect current filter settings:
 
 **Version**: 1.0.0  
 **Last Updated**: 2025-10-31  
-**Maintained by**: TaskFlow Development Team
+**Maintained by**: AetherTrack Development Team

@@ -2,8 +2,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import Navbar from '../components/Navbar';
+import NotificationPrompt from '../components/NotificationPrompt';
+import useRealtimeSync from '../hooks/useRealtimeSync';
 import api from '../api/axios';
-import { Plus, Users, CheckSquare, TrendingUp, Clock, FileSpreadsheet, FileText, AlertTriangle, Calendar, Filter, X } from 'lucide-react';
+import { Plus, Users, CheckSquare, TrendingUp, Clock, FileSpreadsheet, FileText, AlertTriangle, Calendar, Filter, X, Download, Smartphone, X as CloseIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 import { generateExcelReport } from '../utils/reportGenerator';
@@ -58,6 +60,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [reportPeriod, setReportPeriod] = useState('all'); // 'daily', 'weekly', 'monthly', 'all'
   const [showReportOptions, setShowReportOptions] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   // Memoized functions must be defined before useEffect hooks that use them
   const fetchTeams = useCallback(async () => {
@@ -71,7 +76,7 @@ const Dashboard = () => {
       setTeams(response.data.teams || []);
     } catch (error) {
       if (error.response?.status === 403) {
-        console.log('No permission to view teams');
+        // No permission to view teams - silent handling
       } else if (error.response?.status === 401) {
         console.error('Authentication required. Please log in again.');
       } else {
@@ -79,6 +84,126 @@ const Dashboard = () => {
       }
     }
   }, [user?.role]);
+
+  // PWA Install Handler with persistent state
+  useEffect(() => {
+    // Check if app was previously installed (localStorage flag)
+    const wasInstalled = localStorage.getItem('pwa-installed') === 'true';
+    
+    // Check if app is currently running in standalone mode
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                        window.navigator.standalone === true || // iOS Safari
+                        document.referrer.includes('android-app://'); // Android TWA
+    
+    if (wasInstalled || isStandalone) {
+      setIsInstalled(true);
+      setShowInstallBanner(false);
+      // Ensure the flag is set
+      localStorage.setItem('pwa-installed', 'true');
+      return;
+    }
+
+    // Listen for the beforeinstallprompt event
+    const handleBeforeInstallPrompt = (e) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      setDeferredPrompt(e);
+      // Only show install banner if not already installed
+      if (!localStorage.getItem('pwa-installed')) {
+        setShowInstallBanner(true);
+      }
+    };
+
+    // Listen for successful installation
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setShowInstallBanner(false);
+      setDeferredPrompt(null);
+      // Persist installation state
+      localStorage.setItem('pwa-installed', 'true');
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const handleInstallClick = async () => {
+    // Check if already installed
+    if (isInstalled || localStorage.getItem('pwa-installed') === 'true') {
+      alert('✅ TaskFlow is Already Installed!\n\nThe app has been installed on your device.\n\nYou can:\n• Find it on your home screen/desktop\n• Launch it like a native app\n• Access it offline\n\n🎉 You\'re all set!');
+      return;
+    }
+    
+    if (!deferredPrompt) {
+      // If no install prompt available, show comprehensive instructions
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+      const isChrome = /Chrome/.test(navigator.userAgent);
+      const isEdge = /Edg/.test(navigator.userAgent);
+      
+      let instructions = '';
+      
+      if (isIOS || isSafari) {
+        instructions = `📱 Install TaskFlow on iOS/Safari:\n\n` +
+          `1. Tap the Share button (□↑) at the bottom of Safari\n` +
+          `2. Scroll down and tap "Add to Home Screen"\n` +
+          `3. Tap "Add" in the top right to confirm\n\n` +
+          `The TaskFlow icon will appear on your home screen!`;
+      } else if (isChrome || isEdge) {
+        instructions = `💻 Install TaskFlow on Chrome/Edge:\n\n` +
+          `Option 1:\n` +
+          `• Look for the install icon (⊕) in the address bar\n` +
+          `• Click it to install TaskFlow\n\n` +
+          `Option 2:\n` +
+          `• Open browser Menu (⋮)\n` +
+          `• Click "Install TaskFlow" or "Install app"\n\n` +
+          `Note: If you don't see these options, the PWA might not be fully ready yet.`;
+      } else {
+        instructions = `⚠️ Browser Not Supported\n\n` +
+          `Your browser doesn't support PWA installation.\n\n` +
+          `Please use one of these browsers:\n` +
+          `✅ Google Chrome\n` +
+          `✅ Microsoft Edge\n` +
+          `✅ Opera\n` +
+          `✅ Samsung Internet\n\n` +
+          `Firefox has limited PWA support.`;
+      }
+      
+      alert(instructions);
+      return;
+    }
+
+    try {
+      // Show the install prompt
+      deferredPrompt.prompt();
+
+      // Wait for the user to respond to the prompt
+      const { outcome } = await deferredPrompt.userChoice;
+
+      if (outcome === 'accepted') {
+        // Mark as installed
+        setIsInstalled(true);
+        localStorage.setItem('pwa-installed', 'true');
+        // Show success message
+        setTimeout(() => {
+          alert('🎉 TaskFlow has been installed!\n\nYou can now access it from your home screen or desktop.\n\nLook for the TaskFlow icon on your device.');
+        }, 1000);
+      }
+
+      // Clear the deferredPrompt for next time
+      setDeferredPrompt(null);
+      setShowInstallBanner(false);
+    } catch (error) {
+      console.error('Error during installation:', error);
+      alert('❌ Installation Error\n\nSomething went wrong. Please try:\n1. Refreshing the page\n2. Using Chrome or Edge browser\n3. Checking browser console for errors');
+    }
+  };
 
   const applyFilters = useCallback(() => {
     let filtered = [...allTasks];
@@ -306,6 +431,28 @@ const Dashboard = () => {
     }
   }, [allTasks, filters, applyFilters]);
 
+  // Real-time synchronization
+  useRealtimeSync({
+    onTaskCreated: () => {
+      fetchDashboardData();
+    },
+    onTaskUpdated: () => {
+      fetchDashboardData();
+    },
+    onTaskDeleted: () => {
+      fetchDashboardData();
+    },
+    onTeamCreated: () => {
+      fetchTeams();
+    },
+    onTeamUpdated: () => {
+      fetchTeams();
+    },
+    onTeamDeleted: () => {
+      fetchTeams();
+    },
+  });
+
   const updateDetailedStats = (tasks) => {
     // Status breakdown
     const statusBreakdown = {
@@ -379,11 +526,11 @@ const Dashboard = () => {
 
   const getStatusBorderColor = (status) => {
     const colors = {
-      todo: 'border-gray-400',
-      in_progress: 'border-blue-400',
-      review: 'border-yellow-400',
-      done: 'border-green-400',
-      archived: 'border-red-400',
+      todo: 'border-gray-500',
+      in_progress: 'border-blue-500',
+      review: 'border-yellow-500',
+      done: 'border-green-500',
+      archived: 'border-red-500',
     };
     return colors[status] || colors.todo;
   };
@@ -463,12 +610,94 @@ const Dashboard = () => {
     <div className={`min-h-screen ${currentTheme.background} transition-colors`} data-testid="dashboard">
       <div className="flex">
         <Navbar />
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8">
           {/* Header */}
           <div className="mb-8">
             <h1 className={`text-3xl font-bold ${currentTheme.text} transition-colors`}>Welcome back, {user?.full_name}!</h1>
             <p className={`${currentTheme.textSecondary} mt-2 transition-colors`}>Here's what's happening with your tasks today.</p>
           </div>
+
+          {/* Notification Prompt */}
+          <NotificationPrompt />
+
+          {/* PWA Install Banner */}
+          {showInstallBanner && !isInstalled && (
+            <div className={`${currentTheme.surface} border-2 ${currentColorScheme.primary.replace('bg-', 'border-')} rounded-lg shadow-lg p-6 mb-8 relative animate-fade-in`}>
+              <button
+                onClick={() => setShowInstallBanner(false)}
+                className={`absolute top-4 right-4 ${currentTheme.textSecondary} hover:${currentTheme.text} transition-colors`}
+                aria-label="Close banner"
+              >
+                <CloseIcon className="w-5 h-5" />
+              </button>
+              
+              <div className="flex items-start space-x-4">
+                <div className={`${currentColorScheme.primary} p-3 rounded-lg`}>
+                  <Smartphone className="w-8 h-8 text-white" />
+                </div>
+                
+                <div className="flex-1">
+                  <h3 className={`text-xl font-bold ${currentTheme.text} mb-2`}>
+                    Install TaskFlow App
+                  </h3>
+                  <p className={`${currentTheme.textSecondary} mb-4`}>
+                    Get the full app experience! Install TaskFlow on your device for:
+                  </p>
+                  
+                  <ul className={`${currentTheme.textSecondary} space-y-2 mb-4 ml-4`}>
+                    <li className="flex items-center space-x-2">
+                      <CheckSquare className="w-4 h-4 text-green-500" />
+                      <span>Quick access from your home screen</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckSquare className="w-4 h-4 text-green-500" />
+                      <span>Works offline with cached data</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckSquare className="w-4 h-4 text-green-500" />
+                      <span>Faster loading and better performance</span>
+                    </li>
+                    <li className="flex items-center space-x-2">
+                      <CheckSquare className="w-4 h-4 text-green-500" />
+                      <span>Native app-like experience</span>
+                    </li>
+                  </ul>
+                  
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={handleInstallClick}
+                      className={`${currentColorScheme.primary} text-white px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-all flex items-center space-x-2 shadow-lg`}
+                    >
+                      <Download className="w-5 h-5" />
+                      <span>Install Now</span>
+                    </button>
+                    
+                    <button
+                      onClick={() => setShowInstallBanner(false)}
+                      className={`${currentTheme.surface} ${currentTheme.border} border ${currentTheme.text} px-6 py-3 rounded-lg font-semibold hover:opacity-80 transition-all`}
+                    >
+                      Maybe Later
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Already Installed Message */}
+          {isInstalled && (
+            <div className={`${currentTheme.surface} border-2 border-green-500 rounded-lg shadow-lg p-4 mb-8 flex items-center space-x-3`}>
+              <CheckSquare className="w-6 h-6 text-green-500" />
+              <div>
+                <p className={`font-semibold ${currentTheme.text}`}>
+                  TaskFlow App Installed!
+                </p>
+                <p className={`text-sm ${currentTheme.textSecondary}`}>
+                  You're using the installed version. Enjoy the full app experience!
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* Stats Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
@@ -551,6 +780,27 @@ const Dashboard = () => {
                   <Users className="w-5 h-5" />
                   <span>Manage Teams</span>
                 </Link>
+              )}
+              
+              {/* PWA Install Button - Always Visible */}
+              {!isInstalled && (
+                <button
+                  onClick={handleInstallClick}
+                  className={`btn ${deferredPrompt ? currentColorScheme.primary : 'bg-gray-400'} text-white hover:opacity-90 flex items-center space-x-2`}
+                  data-testid="install-app-button"
+                  title={deferredPrompt ? 'Install TaskFlow as an app' : 'Click for installation instructions'}
+                >
+                  <Download className="w-5 h-5" />
+                  <span>{deferredPrompt ? 'Install App' : 'Install Instructions'}</span>
+                </button>
+              )}
+              
+              {/* Installed Indicator */}
+              {isInstalled && (
+                <div className="btn bg-green-600 text-white flex items-center space-x-2 cursor-default">
+                  <CheckSquare className="w-5 h-5" />
+                  <span>App Installed ✓</span>
+                </div>
               )}
               {/* Export buttons - Only visible to admin and hr */}
               {['admin', 'hr'].includes(user?.role) && (
@@ -839,8 +1089,8 @@ const Dashboard = () => {
                     key={team.id} 
                     className={`flex items-center justify-between p-3 rounded-lg transition-all ${
                       team.count > 0 
-                        ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800' 
-                        : 'bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700'
+                        ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-300 dark:border-green-800' 
+                        : 'bg-gray-50 dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-700'
                     }`}
                   >
                     <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -954,14 +1204,14 @@ const Dashboard = () => {
 
           {/* Overdue Tasks Section */}
           {overdueTasks.length > 0 && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-6 mb-8 transition-colors">
+            <div className="bg-red-50 dark:bg-red-900/20 border-2 border-red-300 dark:border-red-800 rounded-lg p-6 mb-8 transition-colors">
               <div className="flex items-center space-x-2 mb-4">
                 <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
                 <h2 className="text-xl font-semibold text-red-800 dark:text-red-200">Overdue Tasks ({overdueTasks.length})</h2>
               </div>
               <div className="space-y-3">
                 {overdueTasks.map((task) => (
-                  <div key={task._id} className={`${currentTheme.surface} rounded-lg p-4 border border-red-200 dark:border-red-700 transition-colors`}>
+                  <div key={task._id} className={`${currentTheme.surface} rounded-lg p-4 border-2 border-red-300 dark:border-red-700 transition-colors`}>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h3 className={`font-semibold ${currentTheme.text}`}>{task.title}</h3>

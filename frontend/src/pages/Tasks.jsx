@@ -4,6 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import api from '../api/axios';
+import useRealtimeSync from '../hooks/useRealtimeSync';
 import { Plus, X, Edit2, Trash2, MessageSquare, Clock, UserCheck } from 'lucide-react';
 
 const Tasks = () => {
@@ -25,6 +26,11 @@ const Tasks = () => {
     status: '',
     priority: '',
     showMyTasksOnly: false,
+    team: '', // Advanced
+    assigned_to: '', // Advanced
+    dueDateFrom: '', // Advanced
+    dueDateTo: '', // Advanced
+    search: '', // Advanced
   });
   const [formData, setFormData] = useState({
     title: '',
@@ -75,18 +81,50 @@ const Tasks = () => {
     applyFilters();
   }, [tasks, filters]);
 
+  // Real-time synchronization
+  useRealtimeSync({
+    onTaskCreated: () => {
+      fetchTasks();
+    },
+    onTaskUpdated: () => {
+      fetchTasks();
+    },
+    onTaskDeleted: () => {
+      fetchTasks();
+    },
+    onCommentAdded: () => {
+      fetchTasks();
+    },
+  });
+
   // Memoize filtered tasks to prevent unnecessary recalculations
   const applyFilters = useCallback(() => {
     let filtered = [...tasks];
-
     if (filters.status) {
       filtered = filtered.filter((t) => t.status === filters.status);
     }
-
     if (filters.priority) {
       filtered = filtered.filter((t) => t.priority === filters.priority);
     }
-
+    if (filters.team) {
+      filtered = filtered.filter((t) => t.team_id && (t.team_id._id === filters.team || t.team_id === filters.team));
+    }
+    if (filters.assigned_to) {
+      filtered = filtered.filter((t) => t.assigned_to && t.assigned_to.some(u => (u._id || u) === filters.assigned_to));
+    }
+    if (filters.dueDateFrom) {
+      filtered = filtered.filter((t) => t.due_date && new Date(t.due_date) >= new Date(filters.dueDateFrom));
+    }
+    if (filters.dueDateTo) {
+      filtered = filtered.filter((t) => t.due_date && new Date(t.due_date) <= new Date(filters.dueDateTo));
+    }
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      filtered = filtered.filter((t) =>
+        t.title.toLowerCase().includes(q) ||
+        (t.description && t.description.toLowerCase().includes(q))
+      );
+    }
     // Filter to show only tasks assigned to current user
     if (filters.showMyTasksOnly) {
       filtered = filtered.filter((t) => {
@@ -94,20 +132,16 @@ const Tasks = () => {
         const assignedIds = Array.isArray(t.assigned_to) 
           ? t.assigned_to.map(u => typeof u === 'object' ? u._id : u)
           : [typeof t.assigned_to === 'object' ? t.assigned_to._id : t.assigned_to];
-        
         const isAssignedToUser = assignedIds.includes(user?.id);
-        
         // For members, also check if task belongs to their team
         if (user?.role === 'member') {
           const belongsToUserTeam = user.team_id && t.team_id && 
             (t.team_id._id === user.team_id || t.team_id === user.team_id);
           return isAssignedToUser && belongsToUserTeam;
         }
-        
         return isAssignedToUser;
       });
     }
-
     setFilteredTasks(filtered);
   }, [tasks, filters, user?.id, user?.role, user?.team_id]);
 
@@ -124,11 +158,13 @@ const Tasks = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await api.get('/users');
+      // Use different endpoint based on role
+      const endpoint = user?.role === 'team_lead' ? '/users/team-members' : '/users';
+      const response = await api.get(endpoint);
       setUsers(response.data.users);
     } catch (error) {
       if (error.response?.status === 403) {
-        console.log('No permission to view all users');
+        // No permission to view all users
       } else {
         console.error('Error fetching users:', error);
       }
@@ -195,12 +231,32 @@ const Tasks = () => {
   };
 
   const openEditModal = (task) => {
+    // Get the team members for the current team
+    const taskTeam = teams.find(t => t._id === (task.team_id?._id || task.team_id));
+    let members = taskTeam ? taskTeam.members : [];
+    
+    // Ensure team lead is always included in the assignable members
+    if (taskTeam && user?.role === 'team_lead') {
+      const teamLeadAlreadyIncluded = members.some(member => member._id === user?.id);
+      if (!teamLeadAlreadyIncluded && taskTeam.lead_id?._id === user?.id) {
+        members = [
+          ...members,
+          {
+            _id: user.id,
+            full_name: user.full_name || user.username || user.email,
+            role: user.role,
+            email: user.email
+          }
+        ];
+      }
+    }
+    
+    setSelectedTeamMembers(members);
     setEditingTask({
       ...task,
-      assigned_to: task.assigned_to ? (Array.isArray(task.assigned_to) ? task.assigned_to.map(u => u._id) : [task.assigned_to._id]) : [],
+      assigned_to: task.assigned_to ? (Array.isArray(task.assigned_to) ? task.assigned_to.map(u => u._id || u) : [task.assigned_to._id || task.assigned_to]) : [],
       team_id: task.team_id?._id || task.team_id || '',
     });
-    setSelectedTeamMembers(task.team_id?.members || []);
     setShowEditModal(true);
   };
 
@@ -250,7 +306,17 @@ const Tasks = () => {
     }
     
     setSelectedTeamMembers(members);
-    setEditingTask({ ...editingTask, team_id: teamId, assigned_to: [] });
+    
+    // Keep existing assignments if they're members of the new team, otherwise clear
+    const memberIds = members.map(m => m._id);
+    const currentAssigned = editingTask.assigned_to || [];
+    const validAssignments = currentAssigned.filter(id => memberIds.includes(id));
+    
+    setEditingTask({ 
+      ...editingTask, 
+      team_id: teamId, 
+      assigned_to: validAssignments 
+    });
   };
 
   const handleMemberToggle = (memberId) => {
@@ -327,11 +393,11 @@ const Tasks = () => {
 
   const getStatusBorderColor = (status) => {
     const colors = {
-      todo: 'border-gray-400',
-      in_progress: 'border-blue-400',
-      review: 'border-yellow-400',
-      done: 'border-green-400',
-      archived: 'border-red-400',
+      todo: 'border-gray-500',
+      in_progress: 'border-blue-500',
+      review: 'border-yellow-500',
+      done: 'border-green-500',
+      archived: 'border-red-500',
     };
     return colors[status] || colors.todo;
   };
@@ -389,7 +455,7 @@ const Tasks = () => {
     <div className={`min-h-screen ${currentTheme.background}`} data-testid="tasks-page">
       <div className="flex">
         <Navbar />
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
@@ -461,6 +527,75 @@ const Tasks = () => {
                 <span>{filters.showMyTasksOnly ? 'My Tasks Only' : 'All Tasks'}</span>
               </button>
             </div>
+            {/* Advanced Filters for HR/Admin */}
+            {['admin', 'hr'].includes(user?.role) && (
+              <>
+                <div>
+                  <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
+                    Team
+                  </label>
+                  <select
+                    value={filters.team}
+                    onChange={(e) => setFilters({ ...filters, team: e.target.value })}
+                    className="input"
+                  >
+                    <option value="">All Teams</option>
+                    {teams.map((team) => (
+                      <option key={team._id} value={team._id}>{team.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
+                    Assigned User
+                  </label>
+                  <select
+                    value={filters.assigned_to}
+                    onChange={(e) => setFilters({ ...filters, assigned_to: e.target.value })}
+                    className="input"
+                  >
+                    <option value="">All Users</option>
+                    {users.map((u) => (
+                      <option key={u._id} value={u._id}>{u.full_name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
+                    Due Date From
+                  </label>
+                  <input
+                    type="date"
+                    value={filters.dueDateFrom}
+                    onChange={(e) => setFilters({ ...filters, dueDateFrom: e.target.value })}
+                    className="input"
+                  />
+                </div>
+                <div>
+                  <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
+                    Due Date To
+                  </label>
+                  <input
+                    type="date"
+                    value={filters.dueDateTo}
+                    onChange={(e) => setFilters({ ...filters, dueDateTo: e.target.value })}
+                    className="input"
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
+                    Search
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Search by title or description..."
+                    value={filters.search}
+                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                    className="input"
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -509,9 +644,36 @@ const Tasks = () => {
               <div className={`text-sm ${currentTheme.textSecondary} mb-4 line-clamp-2`}>{task.description}</div>
 
               <div className="flex flex-wrap gap-2 mb-4">
-                <span className={`text-xs px-2 py-1 rounded-full ${getStatusColor(task.status)}`}>
-                  {task.status.replace('_', ' ')}
-                </span>
+                {/* Enhanced inline status update dropdown */}
+                <select
+                  value={task.status}
+                  onChange={async (e) => {
+                    const newStatus = e.target.value;
+                    try {
+                      await api.patch(`/tasks/${task._id}`, { status: newStatus });
+                      setTasks((prev) => prev.map((t) => t._id === task._id ? { ...t, status: newStatus } : t));
+                    } catch (err) {
+                      alert('Failed to update status');
+                    }
+                  }}
+                  className={`input text-xs px-2 py-1 rounded-full font-semibold border-2 ${
+                    task.status === 'todo' ? 'bg-gray-100 border-gray-400 text-gray-800' :
+                    task.status === 'in_progress' ? 'bg-blue-100 border-blue-400 text-blue-800' :
+                    task.status === 'review' ? 'bg-yellow-100 border-yellow-400 text-yellow-800' :
+                    task.status === 'done' ? 'bg-green-100 border-green-400 text-green-800' :
+                    task.status === 'archived' ? 'bg-red-100 border-red-400 text-red-800' :
+                    'bg-gray-200 border-gray-300 text-gray-700'
+                  } transition-colors`}
+                  style={{ minWidth: 110 }}
+                  data-testid="inline-status-select"
+                  onClick={e => e.stopPropagation()}
+                >
+                  <option value="todo" className="bg-gray-100 text-gray-800">To Do</option>
+                  <option value="in_progress" className="bg-blue-100 text-blue-800">In Progress</option>
+                  <option value="review" className="bg-yellow-100 text-yellow-800">Review</option>
+                  <option value="done" className="bg-green-100 text-green-800">Done</option>
+                  <option value="archived" className="bg-red-100 text-red-800">Archived</option>
+                </select>
                 <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColor(task.priority)}`}>
                   {task.priority}
                 </span>
@@ -639,7 +801,7 @@ const Tasks = () => {
 
               <div>
                 <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
-                  Due Date
+                  Due Date *
                 </label>
                 <input
                   type="date"
@@ -647,6 +809,7 @@ const Tasks = () => {
                   onChange={(e) => setEditingTask({ ...editingTask, due_date: e.target.value })}
                   className="input"
                   data-testid="edit-task-due-date-input"
+                  required
                 />
               </div>
 
@@ -685,7 +848,7 @@ const Tasks = () => {
                               onChange={() => handleMemberToggle(member._id)}
                               className="rounded"
                             />
-                            <span className="text-sm">
+                            <span className={`text-sm ${currentTheme.text}`}>
                               {member.full_name} ({member.role})
                               {member._id === user?.id && <span className="text-blue-600 font-medium"> (You)</span>}
                             </span>
@@ -797,7 +960,7 @@ const Tasks = () => {
 
               <div>
                 <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
-                  Due Date
+                  Due Date *
                 </label>
                 <input
                   type="date"
@@ -805,6 +968,7 @@ const Tasks = () => {
                   onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
                   className="input"
                   data-testid="task-due-date-input"
+                  required
                 />
               </div>
 
@@ -882,7 +1046,7 @@ const Tasks = () => {
                               }}
                               className="rounded"
                             />
-                            <span className="text-sm">
+                            <span className={`text-sm ${currentTheme.text}`}>
                               {member.full_name} ({member.role})
                               {member._id === user?.id && <span className="text-blue-600 font-medium"> (You)</span>}
                             </span>

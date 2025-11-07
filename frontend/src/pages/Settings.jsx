@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Navbar from '../components/Navbar';
 import ThemeToggle from '../components/ThemeToggle';
+import NotificationSettings from '../components/NotificationSettings';
+import SessionSettings from '../components/SessionSettings';
 import api from '../api/axios';
-import { User, Settings as SettingsIcon, Palette, Monitor, Lock, Eye, EyeOff } from 'lucide-react';
+import { User, Settings as SettingsIcon, Palette, Monitor, Lock, Eye, EyeOff, Bell } from 'lucide-react';
 
 const Settings = () => {
   const { user } = useAuth();
@@ -57,7 +59,7 @@ const Settings = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
       <div className="flex">
         <Navbar />
-        <div className="flex-1 p-8">
+        <div className="flex-1 p-4 sm:p-6 lg:p-8">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center space-x-3">
@@ -269,6 +271,62 @@ const Settings = () => {
                 </div>
               </div>
             </div>
+
+            {/* Notification Settings Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
+              <div className="flex items-center space-x-3 mb-6">
+                <Bell className="w-6 h-6 text-blue-600" />
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Notifications</h2>
+              </div>
+              <NotificationSettings />
+            </div>
+
+            {/* Session Timeout Settings Section */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
+              <SessionSettings />
+            </div>
+
+            {/* Debug Information */}
+            {user?.role === 'admin' && (
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-lg shadow-md p-4 sm:p-6 transition-colors mt-8">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                  🔧 Notification Debug Info (Admin Only)
+                </h3>
+                <div className="space-y-2 text-xs sm:text-sm font-mono">
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="text-gray-600 dark:text-gray-400">Browser Support:</span>
+                    <span className="text-gray-900 dark:text-white">
+                      {'Notification' in window ? '✅ Supported' : '❌ Not Supported'}
+                    </span>
+                    
+                    <span className="text-gray-600 dark:text-gray-400">Permission:</span>
+                    <span className="text-gray-900 dark:text-white">
+                      {typeof Notification !== 'undefined' ? Notification.permission : 'N/A'}
+                    </span>
+                    
+                    <span className="text-gray-600 dark:text-gray-400">Service Worker:</span>
+                    <span className="text-gray-900 dark:text-white">
+                      {'serviceWorker' in navigator ? '✅ Available' : '❌ Not Available'}
+                    </span>
+                    
+                    <span className="text-gray-600 dark:text-gray-400">SW Registered:</span>
+                    <span className="text-gray-900 dark:text-white">
+                      {navigator.serviceWorker?.controller ? '✅ Yes' : '⚠️ No'}
+                    </span>
+                  </div>
+                  
+                  <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
+                    <p className="text-yellow-800 dark:text-yellow-200 text-xs">
+                      <strong>Tip:</strong> If notifications aren't working, try:
+                      <br />1. Check browser console for errors
+                      <br />2. Verify HTTPS connection (required for notifications)
+                      <br />3. Clear browser cache and reload
+                      <br />4. Check browser notification settings
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

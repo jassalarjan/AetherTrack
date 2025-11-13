@@ -100,7 +100,7 @@ curl -X POST http://localhost:5000/api/auth/login \
 ### Scenario 3: Multiple Tabs Open
 **Problem**: Logged out in one tab, other tabs still open
 **Solution**:
-1. Close all TaskFlow tabs
+1. Close all AetherTrack tabs
 2. Open one new tab
 3. Log in again
 

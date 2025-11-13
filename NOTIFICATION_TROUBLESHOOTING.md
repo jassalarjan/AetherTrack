@@ -35,7 +35,7 @@ Before diving into detailed troubleshooting, check these common issues:
 
 4. **[ ] Browser Settings Allow Notifications?**
    - Check your browser's notification settings
-   - TaskFlow should be in the "Allowed" list
+   - AetherTrack should be in the "Allowed" list
 
 ## Step-by-Step Debugging
 
@@ -90,8 +90,8 @@ navigator.serviceWorker.controller
 - If `null`, service worker is not registered
 
 **To manually register:**
-1. Close all TaskFlow tabs
-2. Reopen TaskFlow
+1. Close all AetherTrack tabs
+2. Reopen AetherTrack
 3. Check again
 
 ### Step 5: Verify Notification Service
@@ -122,7 +122,7 @@ If permission is "denied", you must manually allow it:
 
 #### Safari:
 1. Safari menu → Settings → Websites → Notifications
-2. Find TaskFlow in the list
+2. Find AetherTrack in the list
 3. Change to "Allow"
 4. Refresh the page
 
@@ -162,7 +162,7 @@ If permission is "denied", you must manually allow it:
 #### Windows Focus Assist:
 - Press `Win + A` to open Action Center
 - Check if Focus Assist is ON
-- Turn it OFF or add TaskFlow to priority list
+- Turn it OFF or add AetherTrack to priority list
 
 #### macOS Do Not Disturb:
 - Click Control Center in menu bar
@@ -219,7 +219,7 @@ Some browser extensions can block notifications:
 
 ### Test Task Assignment Notification:
 
-1. Open TaskFlow in two different browsers (or incognito window)
+1. Open AetherTrack in two different browsers (or incognito window)
 2. Login as two different users
 3. User A assigns a task to User B
 4. User B should receive a notification
@@ -317,7 +317,7 @@ If you've tried everything and notifications still don't work:
 
 1. **Try a different browser** - To isolate browser-specific issues
 2. **Try a different device** - To isolate device-specific issues
-3. **Check TaskFlow logs** - Backend may not be sending events
+3. **Check AetherTrack logs** - Backend may not be sending events
 4. **Verify Socket.IO connection** - Check Network tab for WebSocket
 
 Remember: Notifications are a progressive enhancement. The app works fine without them, but they greatly improve the user experience!

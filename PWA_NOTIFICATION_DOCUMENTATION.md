@@ -1,7 +1,7 @@
 # PWA Notification System
 
 ## Overview
-TaskFlow now includes a comprehensive notification system that works on both desktop and mobile devices. The system leverages the Web Notifications API and Service Workers to provide real-time notifications about tasks, comments, and due dates.
+AetherTrack now includes a comprehensive notification system that works on both desktop and mobile devices. The system leverages the Web Notifications API and Service Workers to provide real-time notifications about tasks, comments, and due dates.
 
 ## Features
 
@@ -37,14 +37,14 @@ TaskFlow now includes a comprehensive notification system that works on both des
 ### For Users
 
 #### Desktop (Chrome, Firefox, Edge)
-1. Open TaskFlow in your browser
+1. Open AetherTrack in your browser
 2. Go to Settings → Notifications
 3. Click "Enable Notifications"
 4. Allow notifications when prompted
 5. Customize your notification preferences
 
 #### Mobile (iOS)
-1. Install TaskFlow as a PWA:
+1. Install AetherTrack as a PWA:
    - Open in Safari
    - Tap Share button
    - Tap "Add to Home Screen"
@@ -56,7 +56,7 @@ TaskFlow now includes a comprehensive notification system that works on both des
 **iOS Requirements**: iOS 16.4 or later for full PWA notification support
 
 #### Mobile (Android)
-1. Install TaskFlow as a PWA:
+1. Install AetherTrack as a PWA:
    - Open in Chrome
    - Tap the "Install" prompt or menu → "Install App"
 2. Open the installed app
@@ -216,18 +216,18 @@ socket.on('task:assigned', (task) => {
 
 **Desktop:**
 1. Check browser settings: `chrome://settings/content/notifications`
-2. Ensure TaskFlow is allowed
+2. Ensure AetherTrack is allowed
 3. Check if "Do Not Disturb" is enabled
 4. Clear browser cache and reload
 
 **iOS:**
 1. Ensure iOS 16.4 or later
 2. Install as PWA (not just Safari tab)
-3. Check Settings → Notifications → TaskFlow
+3. Check Settings → Notifications → AetherTrack
 4. Ensure "Allow Notifications" is ON
 
 **Android:**
-1. Check Settings → Apps → TaskFlow → Notifications
+1. Check Settings → Apps → AetherTrack → Notifications
 2. Ensure notifications are enabled
 3. Check notification channels
 4. Ensure battery optimization is not blocking
@@ -246,7 +246,7 @@ If permission is denied, users must manually enable it in browser settings:
 
 **Safari:**
 1. Safari → Settings → Websites → Notifications
-2. Find TaskFlow and set to "Allow"
+2. Find AetherTrack and set to "Allow"
 
 ## Security & Privacy
 
@@ -307,7 +307,7 @@ describe('NotificationService', () => {
 For issues or questions:
 - Check the troubleshooting section above
 - Review browser console for errors
-- Ensure latest version of TaskFlow
+- Ensure latest version of AetherTrack
 - Contact support with device/browser details
 
 ## Credits
@@ -315,4 +315,4 @@ For issues or questions:
 - Built with Web Notifications API
 - Powered by Service Workers
 - Integrated with Socket.IO for real-time updates
-- Icons from TaskFlow icon set
+- Icons from AetherTrack icon set

@@ -2,11 +2,11 @@
 
 ## Overview
 
-The **Calendar View** is a proposed feature for TaskFlow that will provide users with a visual, date-based representation of tasks, making it easier to manage deadlines, schedule work, and track task distribution across time periods.
+The **Calendar View** is a proposed feature for AetherTrack that will provide users with a visual, date-based representation of tasks, making it easier to manage deadlines, schedule work, and track task distribution across time periods.
 
 ## Current Status
 
-❌ **Not Implemented** - TaskFlow currently displays tasks in:
+❌ **Not Implemented** - AetherTrack currently displays tasks in:
 - **List View** (`/tasks`) - Card-based grid layout with filters
 - **Kanban Board** (`/kanban`) - Column-based status workflow
 - **Dashboard** (`/`) - Overview with recent tasks
@@ -766,7 +766,7 @@ const handleEventDrop = async ({ event, start, end }) => {
 
 ## Conclusion
 
-The Calendar View feature will significantly enhance TaskFlow's task management capabilities by providing a visual, time-based interface for planning and tracking work. This documentation provides a complete implementation guide that can be followed step-by-step to add this feature to the application.
+The Calendar View feature will significantly enhance AetherTrack's task management capabilities by providing a visual, time-based interface for planning and tracking work. This documentation provides a complete implementation guide that can be followed step-by-step to add this feature to the application.
 
 ### Benefits:
 - ✅ Better deadline visualization
@@ -786,4 +786,4 @@ The Calendar View feature will significantly enhance TaskFlow's task management 
 
 **Document Version**: 1.0  
 **Last Updated**: November 2, 2025  
-**Author**: TaskFlow Development Team
+**Author**: AetherTrack Development Team

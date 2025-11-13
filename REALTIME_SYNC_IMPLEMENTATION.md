@@ -1,7 +1,7 @@
 # Real-Time Data Synchronization Implementation
 
 ## Overview
-Implemented real-time data synchronization across all pages in Taskflow using Socket.IO. Data now updates instantly across all open browser tabs and connected users without requiring manual refresh.
+Implemented real-time data synchronization across all pages in AetherTrack using Socket.IO. Data now updates instantly across all open browser tabs and connected users without requiring manual refresh.
 
 ## Problem Solved
 Previously, when data was updated (tasks, users, teams), the changes were not reflected in other pages or tabs until the page was manually refreshed. This caused confusion and delays in collaborative work.

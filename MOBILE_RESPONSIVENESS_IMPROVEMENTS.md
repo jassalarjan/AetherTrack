@@ -1,6 +1,6 @@
 # Mobile Responsiveness Improvements
 
-This document outlines the mobile responsiveness improvements made to the Taskflow application.
+This document outlines the mobile responsiveness improvements made to the AetherTrack application.
 
 ## Overview
 Enhanced mobile responsiveness across the Kanban and Analytics pages to ensure optimal user experience on small screens (mobile devices and tablets).

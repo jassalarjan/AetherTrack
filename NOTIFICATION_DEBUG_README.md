@@ -5,7 +5,7 @@
 If notifications aren't working, **run the diagnostic script**:
 
 ### Method 1: From App
-1. Open TaskFlow
+1. Open AetherTrack
 2. Go to **Settings → Notifications**
 3. Click **"Test Notification"**
 4. Check browser console (F12) for detailed logs

@@ -2,7 +2,7 @@
 
 ## ✅ Implementation Complete
 
-I've successfully implemented a comprehensive desktop and mobile notification system for your TaskFlow PWA. Here's what was added:
+I've successfully implemented a comprehensive desktop and mobile notification system for your AetherTrack PWA. Here's what was added:
 
 ## 📁 Files Created/Modified
 

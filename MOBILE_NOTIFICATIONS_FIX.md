@@ -1,7 +1,7 @@
 # Mobile Notifications Fix - Complete Guide
 
 ## Overview
-This document explains the mobile notification system implementation and troubleshooting steps for TaskFlow.
+This document explains the mobile notification system implementation and troubleshooting steps for AetherTrack.
 
 ## What Was Implemented
 
@@ -68,7 +68,7 @@ Custom slide-up animation for the notification prompt.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    TaskFlow Frontend                     │
+│                    AetherTrack Frontend                     │
 │                                                          │
 │  ┌──────────────────────────────────────────────────┐  │
 │  │     NotificationPrompt Component                  │  │
@@ -104,7 +104,7 @@ Custom slide-up animation for the notification prompt.
                           ▼
             ┌──────────────────────────┐
             │    Backend Server         │
-            │    (taskflow-henr.        │
+            │    (AetherTrack-henr.        │
             │     onrender.com)         │
             └──────────────────────────┘
 ```
@@ -118,7 +118,7 @@ Custom slide-up animation for the notification prompt.
 5. **Frontend receives event** → useNotifications hook processes it
 6. **Check settings** → Verify user wants this type of notification
 7. **Show notification** → Via Service Worker OR direct Notification API
-8. **User clicks notification** → Opens TaskFlow and navigates to task
+8. **User clicks notification** → Opens AetherTrack and navigates to task
 
 ---
 
@@ -167,16 +167,16 @@ Custom slide-up animation for the notification prompt.
 
 #### Critical Steps:
 1. **Must add to Home Screen** - Safari doesn't support notifications in-browser
-2. Open TaskFlow in Safari
+2. Open AetherTrack in Safari
 3. Tap Share button (square with arrow)
 4. Select "Add to Home Screen"
-5. Open TaskFlow from Home Screen icon
+5. Open AetherTrack from Home Screen icon
 6. Enable notifications when prompted
 
 #### Why?
 - iOS Safari restricts Web Notifications API in browser
 - PWA (installed app) has full notification support
-- This is an Apple limitation, not a TaskFlow issue
+- This is an Apple limitation, not a AetherTrack issue
 
 #### Troubleshooting iOS:
 ```
@@ -185,13 +185,13 @@ Custom slide-up animation for the notification prompt.
 2. Opened from Home Screen icon? (not Safari)
 3. iOS 16.4 or later? (earlier versions don't support PWA notifications)
 4. Do Not Disturb off?
-5. Focus mode not blocking TaskFlow?
+5. Focus mode not blocking AetherTrack?
 ```
 
 ### 🤖 Android
 
 #### Steps:
-1. Open TaskFlow in Chrome/Edge
+1. Open AetherTrack in Chrome/Edge
 2. Click "Enable Notifications" when prompted
 3. Grant permission in browser dialog
 4. (Optional) Add to Home Screen for better experience
@@ -220,7 +220,7 @@ Custom slide-up animation for the notification prompt.
 
 ### Expected Behavior:
 - ✅ Notification appears in notification tray (mobile) or desktop
-- ✅ Shows TaskFlow icon
+- ✅ Shows AetherTrack icon
 - ✅ Has title: "🎉 Test Notification"
 - ✅ Body text confirms notifications working
 - ✅ Device vibrates (if on mobile with vibration enabled)
@@ -238,14 +238,14 @@ Custom slide-up animation for the notification prompt.
 
 ### Issue 1: "Notifications not appearing on iPhone"
 **Solution**: 
-- Add TaskFlow to Home Screen (required for iOS)
+- Add AetherTrack to Home Screen (required for iOS)
 - Open from Home Screen icon, not Safari browser
 - Requires iOS 16.4 or later
 
 ### Issue 2: "Permission blocked/denied"
 **Solution**:
 1. Desktop Chrome: Click lock icon in address bar → Site settings → Notifications → Allow
-2. Mobile Chrome: Menu → Settings → Site Settings → Notifications → Find taskflow → Allow
+2. Mobile Chrome: Menu → Settings → Site Settings → Notifications → Find AetherTrack → Allow
 3. Safari: Safari → Settings for [site] → Notifications → Allow
 4. After changing → Refresh page
 
@@ -268,7 +268,7 @@ Custom slide-up animation for the notification prompt.
 **Solution**:
 - Check internet connection
 - Check Socket.IO connection (should show "Connected" in console)
-- Check backend URL is reachable: https://taskflow-henr.onrender.com
+- Check backend URL is reachable: https://AetherTrack-henr.onrender.com
 - Render.com free tier may sleep → First request wakes it up
 
 ---
@@ -344,7 +344,7 @@ frontend/
 - [ ] Permission prompt appears on first visit
 - [ ] Test notification works
 - [ ] Real task notifications appear
-- [ ] Clicking notification opens TaskFlow
+- [ ] Clicking notification opens AetherTrack
 - [ ] Settings persist across sessions
 - [ ] Notifications respect user preferences
 
@@ -363,21 +363,21 @@ frontend/
 ### Enable Notifications - Quick Start
 
 #### Desktop:
-1. Visit TaskFlow Dashboard
+1. Visit AetherTrack Dashboard
 2. Click **"Enable Notifications"** on the banner
 3. Click **"Allow"** in browser popup
 4. You're done! Test it in Settings page.
 
 #### Mobile (Android):
-1. Open TaskFlow in Chrome
+1. Open AetherTrack in Chrome
 2. Tap **"Enable Notifications"** on banner
 3. Tap **"Allow"** in popup
 4. Done! Test in Settings.
 
 #### Mobile (iOS):
-1. Open TaskFlow in Safari
+1. Open AetherTrack in Safari
 2. Tap **Share** → **Add to Home Screen**
-3. Open TaskFlow from Home Screen icon
+3. Open AetherTrack from Home Screen icon
 4. Tap **"Enable Notifications"** when prompted
 5. Tap **"Allow"**
 6. Done!
@@ -405,7 +405,7 @@ If notifications still don't work after following this guide:
    - Browser: (Safari, Chrome, Firefox, etc.)
    - Version: (Check in browser settings)
 
-4. **Contact your TaskFlow administrator** with this information
+4. **Contact your AetherTrack administrator** with this information
 
 ---
 

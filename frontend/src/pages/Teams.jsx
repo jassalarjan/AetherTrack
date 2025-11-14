@@ -332,7 +332,7 @@ const Teams = () => {
               <div className="flex items-center justify-between mb-4 mt-4">
                 <h3 className={`text-xl font-semibold ${currentTheme.text}`}>{team.name}</h3>
                 <div className="flex items-center space-x-2">
-                  <Users className="w-6 h-6 text-blue-600" />
+                  <Users className="w-6 h-6 text-primary-600" />
                   {['admin', 'hr'].includes(user?.role) && (
                     <>
                       <button
@@ -532,7 +532,7 @@ const Teams = () => {
 
             <form onSubmit={handleAddMember} className="space-y-4">
               {/* Toggle Multi-Select Mode */}
-              <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
                 <span className={`text-sm font-medium ${currentTheme.text}`}>
                   {isMultiSelect ? 'Multi-Select Mode' : 'Single Select Mode'}
                 </span>
@@ -563,7 +563,7 @@ const Teams = () => {
                     <button
                       type="button"
                       onClick={toggleSelectAll}
-                      className="text-sm text-blue-600 hover:text-blue-800"
+                      className="text-sm text-primary-600 hover:text-purple-800"
                     >
                       {selectedUserIds.length === users.filter((u) => !selectedTeam.members?.some((m) => m._id === u._id)).length
                         ? 'Deselect All'
@@ -582,7 +582,7 @@ const Teams = () => {
                             type="checkbox"
                             checked={selectedUserIds.includes(u._id)}
                             onChange={() => toggleUserSelection(u._id)}
-                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500 mr-3"
+                            className="w-4 h-4 text-primary-600 rounded focus:ring-blue-500 mr-3"
                           />
                           <div className="flex-1">
                             <div className={`font-medium ${currentTheme.text}`}>{u.full_name}</div>

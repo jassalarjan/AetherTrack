@@ -33,7 +33,7 @@ export default function RegisterDisabled() {
 
         <div className="text-center text-sm text-gray-600">
           <p>Already have an account?</p>
-          <Link to="/login" className="mt-2 inline-block text-blue-600 hover:text-blue-700 font-medium">
+          <Link to="/login" className="mt-2 inline-block text-primary-600 hover:text-primary-700 font-medium">
             Sign in here →
           </Link>
         </div>

@@ -1,4 +1,7 @@
+// Main application routing and layout
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './lib/queryClient';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
@@ -10,10 +13,15 @@ import Tasks from './pages/Tasks';
 import Kanban from './pages/Kanban';
 import Teams from './pages/Teams';
 import UserManagement from './pages/UserManagement';
+import UserAnalytics from './pages/UserAnalytics';
+import HRManagement from './pages/HRManagement';
 import Analytics from './pages/Analytics';
 import Settings from './pages/Settings';
 import Calendar from './pages/Calendar';
 import ChangeLog from './pages/ChangeLog';
+import ColorPreview from './pages/ColorPreview';
+import ProjectsList from './pages/projects/ProjectsList';
+import ProjectDetail from './pages/projects/ProjectDetail';
 
 function AppContent() {
   // Initialize notifications
@@ -79,6 +87,24 @@ function AppContent() {
       />
 
       <Route
+        path="/users/:userId/analytics"
+        element={
+          <ProtectedRoute>
+            <UserAnalytics />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/hr-management"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'hr']}>
+            <HRManagement />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
         path="/settings"
         element={
           <ProtectedRoute>
@@ -105,6 +131,34 @@ function AppContent() {
         }
       />
 
+      <Route
+        path="/color-preview"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <ColorPreview />
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Project Management Routes */}
+      <Route
+        path="/projects"
+        element={
+          <ProtectedRoute>
+            <ProjectsList />
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/projects/:id"
+        element={
+          <ProtectedRoute>
+            <ProjectDetail />
+          </ProtectedRoute>
+        }
+      />
+
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   );
@@ -112,13 +166,15 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 

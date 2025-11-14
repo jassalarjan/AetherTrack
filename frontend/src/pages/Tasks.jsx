@@ -383,7 +383,7 @@ const Tasks = () => {
   const getStatusColor = (status) => {
     const colors = {
       todo: 'bg-gray-100 text-gray-800',
-      in_progress: 'bg-blue-100 text-blue-800',
+      in_progress: 'bg-purple-100 text-purple-800',
       review: 'bg-yellow-100 text-yellow-800',
       done: 'bg-green-100 text-green-800',
       archived: 'bg-red-100 text-red-800',
@@ -394,7 +394,7 @@ const Tasks = () => {
   const getStatusBorderColor = (status) => {
     const colors = {
       todo: 'border-gray-500',
-      in_progress: 'border-blue-500',
+      in_progress: 'border-purple-500',
       review: 'border-yellow-500',
       done: 'border-green-500',
       archived: 'border-red-500',
@@ -405,7 +405,7 @@ const Tasks = () => {
   const getStatusAccentColor = (status) => {
     const colors = {
       todo: 'bg-gray-500',
-      in_progress: 'bg-blue-500',
+      in_progress: 'bg-purple-500',
       review: 'bg-yellow-500',
       done: 'bg-green-500',
       archived: 'bg-red-500',
@@ -439,9 +439,9 @@ const Tasks = () => {
         <div className="flex items-center justify-center h-screen">
           <div className="flex flex-col items-center gap-6">
             <div className="relative">
-              <div className="animate-spin-fast rounded-full h-16 w-16 border-4 border-blue-200 border-t-blue-600"></div>
+              <div className="animate-spin-fast rounded-full h-16 w-16 border-4 border-purple-200 border-t-primary-600"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="animate-pulse h-8 w-8 bg-blue-600 rounded-full opacity-30"></div>
+                <div className="animate-pulse h-8 w-8 bg-primary-600 rounded-full opacity-30"></div>
               </div>
             </div>
             <p className={`${currentTheme.text} font-medium`}>Loading tasks...</p>
@@ -518,7 +518,7 @@ const Tasks = () => {
                 onClick={() => setFilters({ ...filters, showMyTasksOnly: !filters.showMyTasksOnly })}
                 className={`w-full px-4 py-2 rounded-md font-medium transition-colors flex items-center justify-center space-x-2 ${
                   filters.showMyTasksOnly
-                    ? 'bg-blue-600 text-white hover:bg-blue-700'
+                    ? 'bg-primary-600 text-white hover:bg-primary-700'
                     : `${currentTheme.surface} border-2 ${currentTheme.border} ${currentTheme.text} hover:bg-gray-50 dark:hover:bg-gray-700`
                 }`}
                 data-testid="filter-my-tasks"
@@ -624,7 +624,7 @@ const Tasks = () => {
                         e.stopPropagation();
                         openEditModal(task);
                       }}
-                      className="text-blue-600 hover:text-blue-800"
+                      className="text-primary-600 hover:text-purple-800"
                       data-testid="edit-task-btn"
                     >
                       <Edit2 className="w-4 h-4" />
@@ -662,7 +662,7 @@ const Tasks = () => {
                   }}
                   className={`input text-xs px-2 py-1 rounded-full font-semibold border-2 ${
                     task.status === 'todo' ? 'bg-gray-100 border-gray-400 text-gray-800' :
-                    task.status === 'in_progress' ? 'bg-blue-100 border-blue-400 text-blue-800' :
+                    task.status === 'in_progress' ? 'bg-purple-100 border-purple-400 text-purple-800' :
                     task.status === 'review' ? 'bg-yellow-100 border-yellow-400 text-yellow-800' :
                     task.status === 'done' ? 'bg-green-100 border-green-400 text-green-800' :
                     task.status === 'archived' ? 'bg-red-100 border-red-400 text-red-800' :
@@ -673,7 +673,7 @@ const Tasks = () => {
                   onClick={e => e.stopPropagation()}
                 >
                   <option value="todo" className="bg-gray-100 text-gray-800">To Do</option>
-                  <option value="in_progress" className="bg-blue-100 text-blue-800">In Progress</option>
+                  <option value="in_progress" className="bg-purple-100 text-purple-800">In Progress</option>
                   <option value="review" className="bg-yellow-100 text-yellow-800">Review</option>
                   <option value="done" className="bg-green-100 text-green-800">Done</option>
                   <option value="archived" className="bg-red-100 text-red-800">Archived</option>
@@ -855,7 +855,7 @@ const Tasks = () => {
                             />
                             <span className={`text-sm ${currentTheme.text}`}>
                               {member.full_name} ({member.role})
-                              {member._id === user?.id && <span className="text-blue-600 font-medium"> (You)</span>}
+                              {member._id === user?.id && <span className="text-primary-600 font-medium"> (You)</span>}
                             </span>
                           </label>
                         ))}
@@ -1053,7 +1053,7 @@ const Tasks = () => {
                             />
                             <span className={`text-sm ${currentTheme.text}`}>
                               {member.full_name} ({member.role})
-                              {member._id === user?.id && <span className="text-blue-600 font-medium"> (You)</span>}
+                              {member._id === user?.id && <span className="text-primary-600 font-medium"> (You)</span>}
                             </span>
                           </label>
                         ))}
@@ -1152,7 +1152,7 @@ const Tasks = () => {
                         <span className="font-medium">👥 Assigned to:</span>
                         <div className="mt-1">
                           {selectedTask.assigned_to.map((user, index) => (
-                            <span key={user._id} className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-1 mb-1">
+                            <span key={user._id} className="inline-block bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full mr-1 mb-1">
                               {user.full_name}
                             </span>
                           ))}

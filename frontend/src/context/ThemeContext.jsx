@@ -18,9 +18,9 @@ export const ThemeProvider = ({ children }) => {
   });
 
   const [colorScheme, setColorScheme] = useState(() => {
-    // Get saved color scheme from localStorage or default to 'blue'
+    // Get saved color scheme from localStorage or default to 'purple'
     const savedScheme = localStorage.getItem('colorScheme');
-    return savedScheme || 'blue';
+    return savedScheme || 'purple';
   });
 
   // Available color schemes
@@ -49,8 +49,8 @@ export const ThemeProvider = ({ children }) => {
       primaryText: 'text-purple-600',
       accent: 'bg-purple-500',
       accentHover: 'hover:bg-purple-600',
-      secondary: 'bg-indigo-600',
-      secondaryHover: 'hover:bg-indigo-700',
+      secondary: 'bg-violet-600',
+      secondaryHover: 'hover:bg-violet-700',
       warning: 'bg-yellow-500',
       danger: 'bg-red-500',
       success: 'bg-green-500',
@@ -117,15 +117,15 @@ export const ThemeProvider = ({ children }) => {
     },
     indigo: {
       name: 'Indigo',
-      primary: 'bg-indigo-600',
-      primaryHex: '#4f46e5',
-      primaryHover: 'hover:bg-indigo-700',
-      primaryLight: 'bg-indigo-50',
-      primaryText: 'text-indigo-600',
-      accent: 'bg-indigo-500',
-      accentHover: 'hover:bg-indigo-600',
-      secondary: 'bg-blue-600',
-      secondaryHover: 'hover:bg-blue-700',
+      primary: 'bg-violet-600',
+      primaryHex: '#7c3aed',
+      primaryHover: 'hover:bg-violet-700',
+      primaryLight: 'bg-violet-50',
+      primaryText: 'text-violet-600',
+      accent: 'bg-violet-500',
+      accentHover: 'hover:bg-violet-600',
+      secondary: 'bg-purple-600',
+      secondaryHover: 'hover:bg-purple-700',
       warning: 'bg-yellow-500',
       danger: 'bg-red-500',
       success: 'bg-green-500',

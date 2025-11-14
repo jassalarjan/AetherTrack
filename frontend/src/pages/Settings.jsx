@@ -63,7 +63,7 @@ const Settings = () => {
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center space-x-3">
-              <SettingsIcon className="w-8 h-8 text-blue-600" />
+              <SettingsIcon className="w-8 h-8 text-primary-600" />
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white transition-colors">Settings</h1>
             </div>
             <p className="text-gray-600 dark:text-gray-300 mt-2 transition-colors">Customize your AetherTrack experience</p>
@@ -74,7 +74,7 @@ const Settings = () => {
             {/* Profile Section */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
               <div className="flex items-center space-x-3 mb-6">
-                <User className="w-6 h-6 text-blue-600" />
+                <User className="w-6 h-6 text-primary-600" />
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Profile</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -120,7 +120,7 @@ const Settings = () => {
             {/* Security Section - Password Change */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
               <div className="flex items-center space-x-3 mb-6">
-                <Lock className="w-6 h-6 text-blue-600" />
+                <Lock className="w-6 h-6 text-primary-600" />
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Security</h2>
               </div>
               <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -205,7 +205,7 @@ const Settings = () => {
                 <button
                   type="submit"
                   disabled={isChangingPassword}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isChangingPassword ? 'Changing Password...' : 'Change Password'}
                 </button>
@@ -215,7 +215,7 @@ const Settings = () => {
             {/* Appearance Section */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
               <div className="flex items-center space-x-3 mb-6">
-                <Palette className="w-6 h-6 text-blue-600" />
+                <Palette className="w-6 h-6 text-primary-600" />
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Appearance</h2>
               </div>
               <div className="space-y-6">
@@ -244,7 +244,7 @@ const Settings = () => {
             {/* Preferences Section */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
               <div className="flex items-center space-x-3 mb-6">
-                <SettingsIcon className="w-6 h-6 text-blue-600" />
+                <SettingsIcon className="w-6 h-6 text-primary-600" />
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Preferences</h2>
               </div>
               <div className="space-y-4">
@@ -255,7 +255,7 @@ const Settings = () => {
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" className="sr-only peer" defaultChecked />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
                   </label>
                 </div>
 
@@ -266,7 +266,7 @@ const Settings = () => {
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" className="sr-only peer" defaultChecked />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary-600"></div>
                   </label>
                 </div>
               </div>
@@ -275,7 +275,7 @@ const Settings = () => {
             {/* Notification Settings Section */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 transition-colors">
               <div className="flex items-center space-x-3 mb-6">
-                <Bell className="w-6 h-6 text-blue-600" />
+                <Bell className="w-6 h-6 text-primary-600" />
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Notifications</h2>
               </div>
               <NotificationSettings />

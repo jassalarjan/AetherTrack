@@ -42,7 +42,7 @@ const Kanban = () => {
 
   const columns = [
     { id: 'todo', title: 'To Do', color: 'bg-gray-100', borderColor: 'border-gray-500', accentColor: 'bg-gray-500' },
-    { id: 'in_progress', title: 'In Progress', color: 'bg-blue-100', borderColor: 'border-blue-500', accentColor: 'bg-blue-500' },
+    { id: 'in_progress', title: 'In Progress', color: 'bg-purple-100', borderColor: 'border-purple-500', accentColor: 'bg-purple-500' },
     { id: 'review', title: 'Review', color: 'bg-yellow-100', borderColor: 'border-yellow-500', accentColor: 'bg-yellow-500' },
     { id: 'done', title: 'Done', color: 'bg-green-100', borderColor: 'border-green-500', accentColor: 'bg-green-500' },
   ];
@@ -605,7 +605,7 @@ const Kanban = () => {
                           <Users className="w-3 h-3 mr-1" />
                           <div className="flex flex-wrap gap-1">
                             {task.assigned_to.slice(0, 3).map((user) => (
-                              <span key={user._id} className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded text-xs">
+                              <span key={user._id} className="bg-purple-100 text-purple-800 px-1 py-0.5 rounded text-xs">
                                 {user.full_name.split(' ')[0]}
                               </span>
                             ))}
@@ -636,7 +636,7 @@ const Kanban = () => {
                           }}
                           className={`input text-xs px-2 py-1 rounded-full font-semibold border-2 ${
                             task.status === 'todo' ? 'bg-gray-100 border-gray-400 text-gray-800' :
-                            task.status === 'in_progress' ? 'bg-blue-100 border-blue-400 text-blue-800' :
+                            task.status === 'in_progress' ? 'bg-purple-100 border-purple-400 text-purple-800' :
                             task.status === 'review' ? 'bg-yellow-100 border-yellow-400 text-yellow-800' :
                             task.status === 'done' ? 'bg-green-100 border-green-400 text-green-800' :
                             'bg-gray-200 border-gray-300 text-gray-700'
@@ -645,7 +645,7 @@ const Kanban = () => {
                           onClick={e => e.stopPropagation()}
                         >
                           <option value="todo" className="bg-gray-100 text-gray-800">To Do</option>
-                          <option value="in_progress" className="bg-blue-100 text-blue-800">In Progress</option>
+                          <option value="in_progress" className="bg-purple-100 text-purple-800">In Progress</option>
                           <option value="review" className="bg-yellow-100 text-yellow-800">Review</option>
                           <option value="done" className="bg-green-100 text-green-800">Done</option>
                         </select>
@@ -801,7 +801,7 @@ const Kanban = () => {
                             />
                             <span className="text-sm">
                               {member.full_name} ({member.role})
-                              {member._id === user?.id && <span className="text-blue-600 font-medium"> (You)</span>}
+                              {member._id === user?.id && <span className="text-primary-600 font-medium"> (You)</span>}
                             </span>
                           </label>
                         ))}

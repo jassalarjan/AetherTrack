@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --color-primary: #2563eb; /* Default blue */
+  --color-primary: #a855f7; /* AetherTrack Purple */
+  --color-accent: #c026d3; /* AetherTrack Magenta */
 }
 
 * {
@@ -18,6 +19,44 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* AetherTrack Custom Animations */
+@keyframes blob {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  33% {
+    transform: translate(30px, -50px) scale(1.1);
+  }
+  66% {
+    transform: translate(-20px, 20px) scale(0.9);
+  }
+}
+
+.animate-blob {
+  animation: blob 7s infinite;
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.6);
+  }
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
 }
 
 /* Custom Scrollbar Styling */
@@ -187,6 +226,40 @@ body:not(.dark) .shadow-md {
   }
 }
 
+@keyframes fade-in-down {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-5px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(5px);
+  }
+}
+
 .animate-spin-fast {
   animation: spin-fast 0.6s linear infinite;
 }
@@ -197,6 +270,18 @@ body:not(.dark) .shadow-md {
 
 .animate-fade-in {
   animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-fade-in-down {
+  animation: fade-in-down 0.8s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-out forwards;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
 }
 
 .loading-dots {
@@ -236,29 +321,68 @@ body:not(.dark) .shadow-md {
 
 @layer components {
   .btn {
-    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200;
+    @apply px-4 py-2 rounded-xl font-semibold transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98];
   }
   
   .btn-primary {
-    background-color: var(--color-primary);
-    color: white;
-    transition: opacity 0.2s;
-  }
-  
-  .btn-primary:hover {
-    opacity: 0.9;
+    @apply bg-gradient-to-r from-primary-500 to-primary-700 text-white shadow-md hover:shadow-aether;
   }
   
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600;
+    @apply bg-gradient-to-r from-slate-100 to-slate-200 text-slate-700 hover:from-slate-200 hover:to-slate-300 dark:from-slate-700 dark:to-slate-800 dark:text-slate-200 shadow-md;
+  }
+
+  .btn-accent {
+    @apply bg-gradient-to-r from-accent-500 to-accent-600 text-white shadow-md hover:shadow-lg;
   }
   
   .input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all dark:bg-gray-700 dark:border-gray-600 dark:text-white;
   }
   
   .card {
-    @apply bg-white rounded-lg shadow-md p-6 dark:bg-gray-800;
+    @apply bg-white rounded-2xl shadow-lg p-6 border border-gray-100 dark:bg-gray-800 dark:border-gray-700 hover:shadow-xl transition-shadow duration-200;
+  }
+
+  .card-gradient {
+    @apply bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border border-gray-100 dark:from-gray-800 dark:to-gray-900 dark:border-gray-700 hover:shadow-xl transition-all duration-200;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold shadow-sm;
+  }
+
+  .badge-primary {
+    @apply bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300;
+  }
+
+  .badge-success {
+    @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300;
+  }
+
+  .badge-warning {
+    @apply bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300;
+  }
+
+  .badge-danger {
+    @apply bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300;
+  }
+
+  .stat-card {
+    @apply bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-lg p-6 border-l-4 hover:shadow-xl transition-all duration-200 transform hover:-translate-y-1;
+  }
+  
+  /* Custom gradient classes */
+  .bg-gradient-purple {
+    @apply bg-gradient-to-r from-primary-500 to-primary-700;
+  }
+  
+  .bg-gradient-violet {
+    @apply bg-gradient-to-r from-violet-500 to-violet-700;
+  }
+  
+  .bg-gradient-ocean {
+    @apply bg-gradient-to-r from-primary-500 to-primary-700;
   }
 }
 
@@ -429,6 +553,157 @@ body {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+}
+
+/* AetherTrack Page Headers */
+.page-header {
+  background: linear-gradient(135deg, #a855f7 0%, #6b21a8 100%);
+  border-radius: 1.5rem;
+  padding: 2rem;
+  color: white;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.2);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.page-subtitle {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* Dashboard Stat Cards */
+.stat-icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
+  backdrop-filter: blur(10px);
+}
+
+/* Priority Badges */
+.priority-high {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+}
+
+.priority-medium {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.priority-low {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+/* Status Badges */
+.status-pending {
+  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  color: white;
+}
+
+.status-in-progress {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: white;
+}
+
+.status-completed {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.status-overdue {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+/* Glass Card Effect */
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.dark .glass-card {
+  background: rgba(31, 41, 55, 0.7);
+  border: 1px solid rgba(75, 85, 99, 0.3);
+}
+
+/* Hover Effects */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* Action Button Group */
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Data Table Enhancements */
+.data-table {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.data-table th {
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 1rem;
+}
+
+.dark .data-table th {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
+.data-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.dark .data-table td {
+  border-bottom-color: #374151;
+}
+
+.data-table tr:hover {
+  background-color: #f9fafb;
+}
+
+.dark .data-table tr:hover {
+  background-color: #1f2937;
 }
 
 .rbc-toolbar button:hover {

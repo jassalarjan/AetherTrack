@@ -200,7 +200,7 @@ const Calendar = () => {
                   onClick={() => setFilters({ ...filters, showMyTasksOnly: !filters.showMyTasksOnly })}
                   className={`w-full px-4 py-2 rounded-md font-medium ${
                     filters.showMyTasksOnly
-                      ? 'bg-blue-600 text-white'
+                      ? 'bg-primary-600 text-white'
                       : `${currentTheme.surface} border ${currentTheme.border}`
                   }`}
                 >
@@ -230,7 +230,7 @@ const Calendar = () => {
                     <span className={`text-sm ${currentTheme.textSecondary}`}>To Do</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-blue-500 rounded border-2 border-blue-600"></div>
+                    <div className="w-4 h-4 bg-purple-500 rounded border-2 border-primary-600"></div>
                     <span className={`text-sm ${currentTheme.textSecondary}`}>In Progress</span>
                   </div>
                   <div className="flex items-center space-x-2">

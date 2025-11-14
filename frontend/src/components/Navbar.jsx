@@ -1,12 +1,12 @@
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Bell, LogOut, LayoutDashboard, CheckSquare, Users, UserCog, Kanban, Menu, X, ChevronLeft, ChevronRight, BarChart3, Settings, Calendar as CalendarIcon, Activity } from 'lucide-react';
+import { Bell, LogOut, LayoutDashboard, CheckSquare, Users, UserCog, Kanban, Menu, X, ChevronLeft, ChevronRight, BarChart3, Settings, Calendar as CalendarIcon, Activity, User, ClipboardList, FolderKanban } from 'lucide-react';
 import Avatar from './Avatar';
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
 
-const Navbar = () => {
+const Navbar = ({ children }) => {
   const { user, logout } = useAuth();
   const { currentTheme, currentColorScheme } = useTheme();
   const navigate = useNavigate();
@@ -55,10 +55,10 @@ const Navbar = () => {
 
   const getRoleBadge = (role) => {
     const badges = {
-      admin: 'bg-purple-100 text-purple-800',
-      hr: 'bg-green-100 text-green-800',
-      team_lead: 'bg-blue-100 text-blue-800',
-      member: 'bg-gray-100 text-gray-800',
+      admin: 'bg-gradient-to-r from-purple-500 to-pink-500 text-white',
+      hr: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white',
+      team_lead: 'bg-gradient-to-r from-sky-500 to-cyan-500 text-white',
+      member: 'bg-gradient-to-r from-slate-400 to-slate-500 text-white',
     };
     return badges[role] || badges.member;
   };
@@ -68,6 +68,12 @@ const Navbar = () => {
       name: 'Dashboard',
       href: '/dashboard',
       icon: LayoutDashboard,
+      roles: ['admin', 'hr', 'team_lead', 'member'],
+    },
+    {
+      name: 'Projects',
+      href: '/projects',
+      icon: FolderKanban,
       roles: ['admin', 'hr', 'team_lead', 'member'],
     },
     {
@@ -92,6 +98,18 @@ const Navbar = () => {
       name: 'Analytics',
       href: '/analytics',
       icon: BarChart3,
+      roles: ['admin', 'hr', 'team_lead', 'member'],
+    },
+    {
+      name: 'HR Management',
+      href: '/hr-management',
+      icon: ClipboardList,
+      roles: ['admin', 'hr'],
+    },
+    {
+      name: 'My Analytics',
+      href: user ? `/users/${user.id}/analytics` : '/dashboard',
+      icon: User,
       roles: ['admin', 'hr', 'team_lead', 'member'],
     },
     {
@@ -125,10 +143,10 @@ const Navbar = () => {
     return location.pathname === href || (href === '/dashboard' && location.pathname === '/');
   };
 
-  // Derive a border color class from the primary bg class (e.g., bg-blue-600 -> border-blue-600)
+  // Derive a border color class from the primary bg class (e.g., bg-primary-600 -> border-primary-600)
   const primaryBorderClass = currentColorScheme.primary?.startsWith('bg-')
     ? currentColorScheme.primary.replace('bg-', 'border-')
-    : 'border-blue-600';
+    : 'border-primary-600';
 
   return (
     <div className={`flex h-screen ${currentTheme.background}`}>
@@ -161,15 +179,23 @@ const Navbar = () => {
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'} h-20 px-2 border-b ${currentTheme.border} relative`}>
             <Link
               to="/dashboard"
-              className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'}`}
+              className={`flex items-center ${isCollapsed ? 'justify-center' : 'space-x-3'} group`}
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <img 
-                src="/logo.png" 
-                alt="AetherTrack Logo" 
-                className={`${isCollapsed ? 'w-10 h-10' : 'w-12 h-12'} object-contain transition-all`}
-              />
-              {!isCollapsed && <span className={`text-2xl font-bold ${currentTheme.text}`}>AetherTrack</span>}
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-purple rounded-xl blur-sm opacity-50 group-hover:opacity-70 transition-opacity"></div>
+                <div className={`relative bg-gradient-purple ${isCollapsed ? 'p-2' : 'p-2.5'} rounded-xl transition-all`}>
+                  <svg className={`${isCollapsed ? 'w-6 h-6' : 'w-7 h-7'} text-white`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+              </div>
+              {!isCollapsed && (
+                <div className="flex flex-col">
+                  <span className={`text-xl font-bold bg-gradient-purple bg-clip-text text-transparent`}>AetherTrack</span>
+                  <span className={`text-[10px] ${currentTheme.textMuted} font-medium`}>Task Management</span>
+                </div>
+              )}
             </Link>
 
             {/* Collapse Toggle Button */}
@@ -402,7 +428,7 @@ const Navbar = () => {
       {/* Main Content Area */}
       <div className={`flex-1 flex flex-col overflow-hidden ${isCollapsed ? 'md:ml-20' : 'md:ml-64'}`}>
         <main className="flex-1 overflow-y-auto">
-          {/* Content will be rendered here by the router */}
+          {children}
         </main>
       </div>
 

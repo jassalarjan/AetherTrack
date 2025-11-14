@@ -107,7 +107,7 @@ const NotificationSettings = () => {
           {permission !== 'granted' && (
             <button
               onClick={handleRequestPermission}
-              className="btn bg-blue-600 text-white hover:bg-blue-700 text-sm px-4 py-2 w-full sm:w-auto"
+              className="btn bg-primary-600 text-white hover:bg-primary-700 text-sm px-4 py-2 w-full sm:w-auto"
             >
               Enable Notifications
             </button>
@@ -197,7 +197,7 @@ const NotificationSettings = () => {
       )}
 
       {/* Mobile-specific information */}
-      <div className={`mt-4 p-3 sm:p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800`}>
+      <div className={`mt-4 p-3 sm:p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800`}>
         <p className={`text-xs sm:text-sm font-medium ${currentTheme.text} mb-2`}>
           📱 Mobile Device Tips
         </p>
@@ -235,7 +235,7 @@ const NotificationToggle = ({ label, description, checked, onChange, currentThem
       <button
         onClick={onChange}
         className={`flex-shrink-0 mt-0.5 w-10 h-6 sm:w-12 sm:h-7 rounded-full transition-colors ${
-          checked ? 'bg-blue-600' : 'bg-gray-300 dark:bg-gray-600'
+          checked ? 'bg-primary-600' : 'bg-gray-300 dark:bg-gray-600'
         }`}
       >
         <div
@@ -243,7 +243,7 @@ const NotificationToggle = ({ label, description, checked, onChange, currentThem
             checked ? 'translate-x-4 sm:translate-x-5' : 'translate-x-0.5'
           }`}
         >
-          {checked && <Check className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 p-0.5" />}
+          {checked && <Check className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 p-0.5" />}
         </div>
       </button>
       <div className="flex-1 min-w-0">

@@ -1,7 +1,7 @@
 // Quick test script to create a user and trigger email
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import { sendCredentialEmail } from '../utils/emailService.js';
+import emailService from '../utils/emailService.js';
 
 dotenv.config();
 
@@ -28,9 +28,9 @@ const testUserCreationEmail = async () => {
 
     // Try to send email
     console.log('📤 Calling sendCredentialEmail function...');
-    const emailResult = await sendCredentialEmail(
-      testUser.full_name,
+    const emailResult = await emailService.sendCredentialEmail(
       testUser.email,
+      testUser.full_name,
       testUser.password
     );
 

@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema({
     ref: 'Team',
     default: null
   },
+  attendance: {
+    type: Map,
+    of: String,
+    default: {}
+  },
   created_at: {
     type: Date,
     default: Date.now

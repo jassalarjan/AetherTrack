@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { sendCredentialEmail } from './utils/emailService.js';
+import emailService from './utils/emailService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,7 +34,7 @@ const testPassword = 'Test@123456';
 console.log(`📤 Sending test email to: ${testEmail}\n`);
 
 // Send test email
-const result = await sendCredentialEmail(testName, testEmail, testPassword);
+const result = await emailService.sendCredentialEmail(testEmail, testName, testPassword);
 
 if (result.success) {
   console.log('\n✅ SUCCESS! Test email sent successfully!');

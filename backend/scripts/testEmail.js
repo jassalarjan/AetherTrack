@@ -1,4 +1,4 @@
-import { sendCredentialEmail } from '../utils/emailService.js';
+import emailService from '../utils/emailService.js';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -25,9 +25,9 @@ const testCredentialEmail = async () => {
   console.log('');
 
   try {
-    const result = await sendCredentialEmail(
-      testUser.fullName,
+    const result = await emailService.sendCredentialEmail(
       testUser.email,
+      testUser.fullName,
       testUser.password
     );
 

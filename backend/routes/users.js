@@ -4,7 +4,7 @@ import { authenticate } from '../middleware/auth.js';
 import { checkRole } from '../middleware/roleCheck.js';
 import User from '../models/User.js';
 import Team from '../models/Team.js';
-import { sendCredentialEmail, sendPasswordResetEmail } from '../utils/emailService.js';
+import emailService from '../utils/emailService.js';
 import { logChange } from '../utils/changeLogService.js';
 import multer from 'multer';
 import xlsx from 'xlsx';
@@ -156,8 +156,14 @@ router.get('/team-members', authenticate, checkRole(['team_lead']), async (req, 
 });
 
 // Get single user by ID (Admin & HR only)
-router.get('/:id', authenticate, checkRole(['admin', 'hr']), async (req, res) => {
+// Get user by ID (admin, HR, or the user themselves)
+router.get('/:id', authenticate, async (req, res) => {
   try {
+    // Allow admin, HR, or the user themselves to view
+    if (req.user.role !== 'admin' && req.user.role !== 'hr' && req.user._id.toString() !== req.params.id) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+
     const user = await User.findById(req.params.id)
       .select('-password_hash')
       .populate('team_id');
@@ -211,7 +217,7 @@ router.post('/', authenticate, checkRole(['admin', 'hr']), validateUserCreation,
     // Send credential email with timeout (non-blocking)
     // Don't wait more than 10 seconds for email
     const emailPromise = Promise.race([
-      sendCredentialEmail(full_name, email, password),
+      emailService.sendCredentialEmail(email, full_name, password),
       new Promise((resolve) => 
         setTimeout(() => resolve({ 
           success: false, 
@@ -423,7 +429,7 @@ router.patch('/:id/password', authenticate, checkRole(['admin', 'hr']), async (r
     await user.save();
 
     // Send password reset email (non-blocking, fire and forget)
-    sendPasswordResetEmail(user.full_name, user.email, password)
+    emailService.sendPasswordResetEmail(user.email, user.full_name, password)
       .then((emailResult) => {
         // Email result handled silently
       })
@@ -645,7 +651,7 @@ async function processBulkUsers(usersData, currentUser) {
 
       // Try to send credential email (don't fail import if email fails)
       try {
-        await sendCredentialEmail(userData.email, userData.password);
+        await emailService.sendCredentialEmail(userData.email, userData.full_name, userData.password);
       } catch (emailError) {
         console.error(`Failed to send email to ${userData.email}:`, emailError);
       }
@@ -758,6 +764,162 @@ router.get('/bulk-import/template-json', authenticate, checkRole(['admin', 'hr']
   } catch (error) {
     console.error('JSON template download error:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// Send email reminder to user
+router.post('/send-reminder', authenticate, checkRole(['admin', 'hr']), async (req, res) => {
+  try {
+    const { userId, subject, message } = req.body;
+
+    if (!userId || !subject || !message) {
+      return res.status(400).json({ message: 'User ID, subject, and message are required' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Send custom email using emailService
+    await emailService.sendEmail({
+      to: user.email,
+      subject: subject,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <div style="background: linear-gradient(to right, #9333ea, #c026d3); padding: 30px; text-align: center;">
+            <h1 style="color: white; margin: 0;">AetherTrack</h1>
+          </div>
+          <div style="padding: 30px; background-color: #f9fafb;">
+            <p style="color: #374151; white-space: pre-line;">${message}</p>
+          </div>
+          <div style="padding: 20px; text-align: center; background-color: #f3f4f6; border-top: 1px solid #e5e7eb;">
+            <p style="color: #6b7280; font-size: 14px; margin: 0;">
+              This is an automated message from AetherTrack
+            </p>
+          </div>
+        </div>
+      `
+    });
+
+    // Log the action
+    await logChange({
+      event_type: 'notification_sent',
+      user: req.user,
+      user_ip: req.ip,
+      target_type: 'user',
+      target_id: userId,
+      target_name: user.full_name,
+      action: 'reminder_sent',
+      description: `Email reminder sent to ${user.email}`,
+      metadata: { subject },
+      changes: {
+        subject,
+        sentTo: user.email
+      }
+    });
+
+    res.json({ message: 'Email sent successfully' });
+  } catch (error) {
+    console.error('Send reminder error:', error);
+    res.status(500).json({ message: 'Failed to send email', error: error.message });
+  }
+});
+
+// Mark user attendance
+router.post('/attendance/mark', authenticate, checkRole(['admin', 'hr']), async (req, res) => {
+  try {
+    const { userId, date, status } = req.body;
+
+    if (!userId || !date || !status) {
+      return res.status(400).json({ message: 'User ID, date, and status are required' });
+    }
+
+    const validStatuses = ['present', 'absent', 'on_leave', 'remote', 'half_day'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Invalid attendance status' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Initialize attendance object if it doesn't exist
+    if (!user.attendance) {
+      user.attendance = {};
+    }
+
+    // Store attendance for the date
+    user.attendance[date] = status;
+    user.markModified('attendance'); // Required for nested object updates
+    await user.save();
+
+    // Log the action
+    await logChange({
+      event_type: 'user_action',
+      user: req.user,
+      user_ip: req.ip,
+      target_type: 'User',
+      target_id: userId,
+      target_name: user.full_name,
+      action: 'attendance_marked',
+      description: `Attendance marked as ${status} for ${user.full_name} on ${date}`,
+      metadata: { date, status },
+      changes: {
+        date,
+        status
+      }
+    });
+
+    res.json({ 
+      message: 'Attendance marked successfully',
+      attendance: user.attendance
+    });
+  } catch (error) {
+    console.error('Mark attendance error:', error);
+    res.status(500).json({ message: 'Failed to mark attendance', error: error.message });
+  }
+});
+
+// Get attendance overview for all users
+router.get('/attendance/overview', authenticate, checkRole(['admin', 'hr']), async (req, res) => {
+  try {
+    const users = await User.find().select('_id attendance');
+    
+    const attendanceData = {};
+    users.forEach(user => {
+      if (user.attendance) {
+        attendanceData[user._id] = user.attendance;
+      }
+    });
+
+    res.json(attendanceData);
+  } catch (error) {
+    console.error('Get attendance overview error:', error);
+    res.status(500).json({ message: 'Failed to fetch attendance data', error: error.message });
+  }
+});
+
+// Get user attendance history
+router.get('/attendance/:userId', authenticate, async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Allow users to view their own attendance or admins/HR to view any
+    if (req.user._id.toString() !== userId && !['admin', 'hr'].includes(req.user.role)) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const user = await User.findById(userId).select('attendance');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user.attendance || {});
+  } catch (error) {
+    console.error('Get user attendance error:', error);
+    res.status(500).json({ message: 'Failed to fetch attendance', error: error.message });
   }
 });
 

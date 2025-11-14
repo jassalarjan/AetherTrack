@@ -59,7 +59,7 @@ const ThemeToggle = () => {
                       setShowThemeMenu(false);
                     }}
                     className={`w-full flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                      theme === key ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                      theme === key ? 'bg-purple-50 dark:bg-purple-900/50 text-primary-600 dark:text-purple-400' : 'text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     {key === 'light' && <Sun className="w-4 h-4" />}
@@ -84,7 +84,7 @@ const ThemeToggle = () => {
           <Palette className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           <div
             className={`w-4 h-4 rounded-full ${
-              colorSchemes[colorScheme]?.primary || 'bg-blue-500'
+              colorSchemes[colorScheme]?.primary || 'bg-purple-500'
             }`}
           />
           <ChevronDown className="w-4 h-4 text-gray-500" />
@@ -109,7 +109,7 @@ const ThemeToggle = () => {
                       setShowColorMenu(false);
                     }}
                     className={`w-full flex items-center space-x-3 px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                      colorScheme === key ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400' : 'text-gray-700 dark:text-gray-300'
+                      colorScheme === key ? 'bg-purple-50 dark:bg-purple-900/50 text-primary-600 dark:text-purple-400' : 'text-gray-700 dark:text-gray-300'
                     }`}
                   >
                     <div className={`w-4 h-4 rounded-full ${schemeData.primary}`} />

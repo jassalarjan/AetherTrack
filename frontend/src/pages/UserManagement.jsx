@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { useTheme } from '../context/ThemeContext';
 import useRealtimeSync from '../hooks/useRealtimeSync';
-import { Upload, Download, FileJson, FileSpreadsheet, X, Search, Filter, Users as UsersIcon } from 'lucide-react';
+import { Upload, Download, FileJson, FileSpreadsheet, X, Search, Filter, Users as UsersIcon, BarChart3 } from 'lucide-react';
 
 export default function UserManagement() {
   const { user } = useAuth();
@@ -395,7 +396,7 @@ export default function UserManagement() {
   const getRoleBadgeColor = (role) => {
     const colors = {
       admin: 'bg-purple-100 text-purple-800',
-      hr: 'bg-blue-100 text-blue-800',
+      hr: 'bg-purple-100 text-purple-800',
       team_lead: 'bg-green-100 text-green-800',
       member: 'bg-gray-100 text-gray-800'
     };
@@ -498,7 +499,7 @@ export default function UserManagement() {
                   <Filter className="w-4 h-4" />
                   <span>Filters</span>
                   {(roleFilter !== 'all' || teamFilter !== 'all') && (
-                    <span className="ml-1 px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full">
+                    <span className="ml-1 px-2 py-0.5 bg-purple-500 text-white text-xs rounded-full">
                       Active
                     </span>
                   )}
@@ -601,7 +602,7 @@ export default function UserManagement() {
 
           <button
             onClick={() => downloadTemplate('excel')}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 text-sm sm:text-base"
+            className="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 text-sm sm:text-base"
           >
             <FileSpreadsheet className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden lg:inline">Download Excel Template</span>
@@ -610,7 +611,7 @@ export default function UserManagement() {
 
           <button
             onClick={() => downloadTemplate('json')}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 text-sm sm:text-base"
+            className="bg-primary-600 hover:bg-primary-700 text-white px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 text-sm sm:text-base"
           >
             <FileJson className="w-4 h-4 sm:w-5 sm:h-5" />
             <span className="hidden lg:inline">Download JSON Template</span>
@@ -674,7 +675,7 @@ export default function UserManagement() {
                             type="checkbox"
                             checked={selectedUserIds.includes(usr._id)}
                             onChange={() => toggleSelectUser(usr._id)}
-                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            className="w-4 h-4 text-primary-600 rounded focus:ring-blue-500"
                           />
                         )}
                         <h3 className={`text-base font-semibold ${currentTheme.text}`}>{usr.full_name}</h3>
@@ -698,9 +699,16 @@ export default function UserManagement() {
                   </div>
                   
                   <div className="flex flex-wrap gap-2">
+                    <Link
+                      to={`/users/${usr._id}/analytics`}
+                      className="text-purple-600 hover:text-purple-900 text-sm font-medium px-3 py-1 bg-purple-50 rounded flex items-center gap-1"
+                    >
+                      <BarChart3 className="w-4 h-4" />
+                      Analytics
+                    </Link>
                     <button
                       onClick={() => openEditModal(usr)}
-                      className="text-blue-600 hover:text-blue-900 text-sm font-medium px-3 py-1 bg-blue-50 rounded"
+                      className="text-primary-600 hover:text-primary-900 text-sm font-medium px-3 py-1 bg-purple-50 rounded"
                     >
                       Edit
                     </button>
@@ -742,7 +750,7 @@ export default function UserManagement() {
                           type="checkbox"
                           checked={selectedUserIds.length > 0 && selectedUserIds.length === users.filter(usr => usr._id !== user.id).length}
                           onChange={toggleSelectAll}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          className="w-4 h-4 text-primary-600 rounded focus:ring-blue-500"
                           title="Select/Deselect All"
                         />
                       </th>
@@ -777,7 +785,7 @@ export default function UserManagement() {
                               type="checkbox"
                               checked={selectedUserIds.includes(usr._id)}
                               onChange={() => toggleSelectUser(usr._id)}
-                              className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                              className="w-4 h-4 text-primary-600 rounded focus:ring-blue-500"
                             />
                           ) : (
                             <span className="text-gray-300">—</span>
@@ -808,7 +816,7 @@ export default function UserManagement() {
                       <td className="px-4 xl:px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
                           onClick={() => openEditModal(usr)}
-                          className="text-blue-600 hover:text-blue-900 mr-3"
+                          className="text-primary-600 hover:text-primary-900 mr-3"
                           title="Edit User"
                         >
                           Edit
@@ -1069,9 +1077,9 @@ export default function UserManagement() {
                     <div className="space-y-4">
                       {/* Summary */}
                       <div className="grid grid-cols-3 gap-2 sm:gap-4">
-                        <div className="bg-blue-50 p-3 sm:p-4 rounded-lg">
-                          <p className="text-xs sm:text-sm text-blue-600 font-medium">Total</p>
-                          <p className="text-xl sm:text-2xl font-bold text-blue-700">{bulkImportResults.total}</p>
+                        <div className="bg-purple-50 p-3 sm:p-4 rounded-lg">
+                          <p className="text-xs sm:text-sm text-primary-600 font-medium">Total</p>
+                          <p className="text-xl sm:text-2xl font-bold text-primary-700">{bulkImportResults.total}</p>
                         </div>
                         <div className="bg-green-50 p-3 sm:p-4 rounded-lg">
                           <p className="text-xs sm:text-sm text-green-600 font-medium">Successful</p>
@@ -1166,7 +1174,7 @@ export default function UserManagement() {
                           setBulkImportResults(null);
                           setBulkImportFile(null);
                         }}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 sm:py-3 px-4 rounded-lg font-medium text-sm sm:text-base"
+                        className="flex-1 bg-primary-600 hover:bg-primary-700 text-white py-2 sm:py-3 px-4 rounded-lg font-medium text-sm sm:text-base"
                       >
                         Import More Users
                       </button>

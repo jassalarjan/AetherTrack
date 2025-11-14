@@ -41,7 +41,7 @@ const SessionSettings = () => {
   return (
     <div className={`${currentTheme.surface} rounded-lg shadow-md p-4 sm:p-6`}>
       <div className="flex items-center space-x-3 mb-4 sm:mb-6">
-        <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+        <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600" />
         <h2 className={`text-lg sm:text-xl font-semibold ${currentTheme.text}`}>Session Timeout</h2>
       </div>
 
@@ -82,7 +82,7 @@ const SessionSettings = () => {
         <div className={`${currentTheme.surfaceSecondary} p-3 rounded-lg`}>
           <p className={`text-xs sm:text-sm ${currentTheme.textSecondary}`}>
             <strong>Current selection:</strong> You'll be logged out after{' '}
-            <span className="text-blue-600 dark:text-blue-400 font-semibold">
+            <span className="text-primary-600 dark:text-purple-400 font-semibold">
               {sessionTimeout >= 1 
                 ? `${sessionTimeout} hour${sessionTimeout !== 1 ? 's' : ''}`
                 : `${sessionTimeout * 60} minutes`}
@@ -93,7 +93,7 @@ const SessionSettings = () => {
 
         <button
           onClick={handleSave}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm sm:text-base"
+          className="w-full bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-sm sm:text-base"
         >
           {saved ? '✓ Saved!' : 'Save Session Settings'}
         </button>

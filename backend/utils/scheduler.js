@@ -2,7 +2,7 @@ import cron from 'node-cron';
 import Task from '../models/Task.js';
 import User from '../models/User.js';
 import Team from '../models/Team.js';
-import { sendOverdueTaskReminder, sendWeeklyReport } from './emailService.js';
+import emailService from './emailService.js';
 import { generateExcelReport, generatePDFReport, isTaskOverdue, calculateDaysUntilDue } from './reportGenerator.js';
 import { logChange } from './changeLogService.js';
 
@@ -87,10 +87,11 @@ const sendOverdueReminders = async () => {
 
     for (const [email, userData] of userTasksMap.entries()) {
       try {
-        const result = await sendOverdueTaskReminder(
-          userData.fullName,
+        const result = await emailService.sendOverdueTaskReminder(
           userData.email,
-          userData.tasks
+          userData.fullName,
+          userData.tasks[0].title,
+          userData.tasks[0].due_date
         );
         
         if (result.success) {
@@ -257,11 +258,10 @@ const sendWeeklyReports = async () => {
 
     for (const admin of admins) {
       try {
-        const result = await sendWeeklyReport(
-          admin.full_name,
+        const result = await emailService.sendWeeklyReport(
           admin.email,
-          reportData,
-          attachments
+          admin.full_name,
+          reportData
         );
         
         if (result.success) {

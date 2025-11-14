@@ -16,11 +16,15 @@ import taskRoutes from './routes/tasks.js';
 import commentRoutes from './routes/comments.js';
 import notificationRoutes from './routes/notifications.js';
 import changelogRoutes from './routes/changelog.js';
+import projectRoutes from './routes/projects.js';
+import milestoneRoutes from './routes/milestones.js';
+import dependencyRoutes from './routes/dependencies.js';
+import schedulerRoutes from './routes/scheduler.js';
 
 // Import scheduler
 import { initializeScheduler } from './utils/scheduler.js';
 
-// Load environment variables (ensure we read backend/.env even if CWD is project root)
+// Load environment variables (ensure we read backend/.env even if CWD is Task root)
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.join(__dirname, '.env') });
@@ -83,6 +87,12 @@ app.use(cookieParser());
 // Make io accessible to routes
 app.set('io', io);
 
+// Middleware to attach io to request
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 // Socket.IO connection handling
 io.on('connection', (socket) => {
   console.log('✅ Client connected:', socket.id);
@@ -91,6 +101,18 @@ io.on('connection', (socket) => {
   socket.on('join', (userId) => {
     socket.join(userId);
     console.log(`User ${userId} joined their room`);
+  });
+
+  // Join project room
+  socket.on('join-project', (projectId) => {
+    socket.join(`project:${projectId}`);
+    console.log(`Socket ${socket.id} joined project:${projectId}`);
+  });
+
+  // Leave project room
+  socket.on('leave-project', (projectId) => {
+    socket.leave(`project:${projectId}`);
+    console.log(`Socket ${socket.id} left project:${projectId}`);
   });
 
   socket.on('disconnect', () => {
@@ -106,6 +128,12 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/changelog', changelogRoutes);
+
+// Project management routes
+app.use('/api/projects', projectRoutes);
+app.use('/api', milestoneRoutes);
+app.use('/api', dependencyRoutes);
+app.use('/api', schedulerRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

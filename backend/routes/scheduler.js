@@ -2,7 +2,7 @@ import express from 'express';
 import schedulerService from '../utils/schedulerService.js';
 import Project from '../models/Project.js';
 import ActivityLog from '../models/ActivityLog.js';
-import auth from '../middleware/auth.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ const checkProjectAccess = (requiredRole = 'viewer') => {
         return res.status(404).json({ error: 'Project not found' });
       }
       
-      if (!project.hasAccess(req.user.userId, requiredRole)) {
+      if (!project.hasAccess(req.user._id, requiredRole)) {
         return res.status(403).json({ error: 'Insufficient permissions' });
       }
       
@@ -30,7 +30,7 @@ const checkProjectAccess = (requiredRole = 'viewer') => {
 };
 
 // Calculate critical path
-router.get('/projects/:projectId/schedule/critical-path', auth, checkProjectAccess('viewer'), async (req, res) => {
+router.get('/projects/:projectId/schedule/critical-path', authenticate, checkProjectAccess('viewer'), async (req, res) => {
   try {
     const result = await schedulerService.calculateCriticalPath(req.params.projectId);
     res.json(result);
@@ -40,7 +40,7 @@ router.get('/projects/:projectId/schedule/critical-path', auth, checkProjectAcce
 });
 
 // Generate auto-schedule preview
-router.post('/projects/:projectId/schedule/compute', auth, checkProjectAccess('editor'), async (req, res) => {
+router.post('/projects/:projectId/schedule/compute', authenticate, checkProjectAccess('editor'), async (req, res) => {
   try {
     const { start_date } = req.body;
     
@@ -60,7 +60,7 @@ router.post('/projects/:projectId/schedule/compute', auth, checkProjectAccess('e
 });
 
 // Apply auto-schedule
-router.post('/projects/:projectId/schedule/apply', auth, checkProjectAccess('editor'), async (req, res) => {
+router.post('/projects/:projectId/schedule/apply', authenticate, checkProjectAccess('editor'), async (req, res) => {
   try {
     const { updates } = req.body;
     
@@ -73,7 +73,7 @@ router.post('/projects/:projectId/schedule/apply', auth, checkProjectAccess('edi
     // Log activity
     await ActivityLog.logActivity({
       project_id: req.params.projectId,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'updated',
       object_type: 'project',
       object_id: req.params.projectId,

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Search, Filter, Grid, List } from 'lucide-react';
+import Navbar from '../../components/Navbar';
 import { useProjects, useCreateProject } from '../../hooks/useProjects';
 import { useProjectStore } from '../../stores/projectStore';
 
@@ -31,9 +32,10 @@ export default function ProjectsList() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
+    <Navbar>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-6">
             <div className="flex items-center justify-between">
@@ -137,7 +139,8 @@ export default function ProjectsList() {
           isLoading={createProject.isPending}
         />
       )}
-    </div>
+      </div>
+    </Navbar>
   );
 }
 

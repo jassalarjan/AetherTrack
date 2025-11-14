@@ -4,6 +4,7 @@ import {
   ArrowLeft, Settings, LayoutGrid, Calendar, GanttChart, 
   Table, Users, Activity, ChevronDown 
 } from 'lucide-react';
+import Navbar from '../../components/Navbar';
 import { useProject } from '../../hooks/useProjects';
 import { useProjectStore } from '../../stores/projectStore';
 import KanbanView from '../../components/views/KanbanView';
@@ -58,9 +59,10 @@ export default function ProjectDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b sticky top-0 z-40">
+    <Navbar>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b sticky top-0 z-40">
         <div className="px-4 sm:px-6 lg:px-8">
           <div className="py-4">
             {/* Top row: Back button and project info */}
@@ -110,7 +112,8 @@ export default function ProjectDetail() {
       {/* Side panels */}
       <TaskEditorPanel />
       <MilestoneEditorPanel />
-    </div>
+      </div>
+    </Navbar>
   );
 }
 

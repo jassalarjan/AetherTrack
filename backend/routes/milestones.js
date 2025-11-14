@@ -2,7 +2,7 @@ import express from 'express';
 import Milestone from '../models/Milestone.js';
 import Project from '../models/Project.js';
 import ActivityLog from '../models/ActivityLog.js';
-import auth from '../middleware/auth.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ const checkProjectAccess = (requiredRole = 'viewer') => {
         return res.status(404).json({ error: 'Project not found' });
       }
       
-      if (!project.hasAccess(req.user.userId, requiredRole)) {
+      if (!project.hasAccess(req.user._id, requiredRole)) {
         return res.status(403).json({ error: 'Insufficient permissions' });
       }
       
@@ -30,7 +30,7 @@ const checkProjectAccess = (requiredRole = 'viewer') => {
 };
 
 // Create milestone
-router.post('/projects/:projectId/milestones', auth, checkProjectAccess('editor'), async (req, res) => {
+router.post('/projects/:projectId/milestones', authenticate, checkProjectAccess('editor'), async (req, res) => {
   try {
     const {
       title,
@@ -47,7 +47,7 @@ router.post('/projects/:projectId/milestones', auth, checkProjectAccess('editor'
       start_date,
       end_date,
       linked_task_ids: linked_task_ids || [],
-      created_by: req.user.userId
+      created_by: req.user._id
     });
     
     await milestone.save();
@@ -61,7 +61,7 @@ router.post('/projects/:projectId/milestones', auth, checkProjectAccess('editor'
     // Log activity
     await ActivityLog.logActivity({
       project_id: req.params.projectId,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'created',
       object_type: 'milestone',
       object_id: milestone._id,
@@ -80,7 +80,7 @@ router.post('/projects/:projectId/milestones', auth, checkProjectAccess('editor'
 });
 
 // Get all milestones for a project
-router.get('/projects/:projectId/milestones', auth, checkProjectAccess('viewer'), async (req, res) => {
+router.get('/projects/:projectId/milestones', authenticate, checkProjectAccess('viewer'), async (req, res) => {
   try {
     const { status, start_date, end_date } = req.query;
     
@@ -105,7 +105,7 @@ router.get('/projects/:projectId/milestones', auth, checkProjectAccess('viewer')
 });
 
 // Get single milestone
-router.get('/milestones/:id', auth, async (req, res) => {
+router.get('/milestones/:id', authenticate, async (req, res) => {
   try {
     const milestone = await Milestone.findById(req.params.id)
       .populate('linked_task_ids', 'title status progress due_date')
@@ -117,7 +117,7 @@ router.get('/milestones/:id', auth, async (req, res) => {
     
     // Check project access
     const project = await Project.findById(milestone.project_id);
-    if (!project.hasAccess(req.user.userId, 'viewer')) {
+    if (!project.hasAccess(req.user._id, 'viewer')) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
     
@@ -128,7 +128,7 @@ router.get('/milestones/:id', auth, async (req, res) => {
 });
 
 // Update milestone
-router.patch('/milestones/:id', auth, async (req, res) => {
+router.patch('/milestones/:id', authenticate, async (req, res) => {
   try {
     const milestone = await Milestone.findById(req.params.id);
     
@@ -138,7 +138,7 @@ router.patch('/milestones/:id', auth, async (req, res) => {
     
     // Check project access
     const project = await Project.findById(milestone.project_id);
-    if (!project.hasAccess(req.user.userId, 'editor')) {
+    if (!project.hasAccess(req.user._id, 'editor')) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
     
@@ -161,7 +161,7 @@ router.patch('/milestones/:id', auth, async (req, res) => {
     // Log activity
     await ActivityLog.logActivity({
       project_id: milestone.project_id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'updated',
       object_type: 'milestone',
       object_id: milestone._id,
@@ -180,7 +180,7 @@ router.patch('/milestones/:id', auth, async (req, res) => {
 });
 
 // Link tasks to milestone
-router.post('/milestones/:id/link', auth, async (req, res) => {
+router.post('/milestones/:id/link', authenticate, async (req, res) => {
   try {
     const { task_ids } = req.body;
     
@@ -196,7 +196,7 @@ router.post('/milestones/:id/link', auth, async (req, res) => {
     
     // Check project access
     const project = await Project.findById(milestone.project_id);
-    if (!project.hasAccess(req.user.userId, 'editor')) {
+    if (!project.hasAccess(req.user._id, 'editor')) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
     
@@ -214,7 +214,7 @@ router.post('/milestones/:id/link', auth, async (req, res) => {
     // Log activity
     await ActivityLog.logActivity({
       project_id: milestone.project_id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'milestone_linked',
       object_type: 'milestone',
       object_id: milestone._id,
@@ -233,7 +233,7 @@ router.post('/milestones/:id/link', auth, async (req, res) => {
 });
 
 // Unlink tasks from milestone
-router.post('/milestones/:id/unlink', auth, async (req, res) => {
+router.post('/milestones/:id/unlink', authenticate, async (req, res) => {
   try {
     const { task_ids } = req.body;
     
@@ -249,7 +249,7 @@ router.post('/milestones/:id/unlink', auth, async (req, res) => {
     
     // Check project access
     const project = await Project.findById(milestone.project_id);
-    if (!project.hasAccess(req.user.userId, 'editor')) {
+    if (!project.hasAccess(req.user._id, 'editor')) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
     
@@ -265,7 +265,7 @@ router.post('/milestones/:id/unlink', auth, async (req, res) => {
     // Log activity
     await ActivityLog.logActivity({
       project_id: milestone.project_id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'updated',
       object_type: 'milestone',
       object_id: milestone._id,
@@ -284,7 +284,7 @@ router.post('/milestones/:id/unlink', auth, async (req, res) => {
 });
 
 // Recalculate milestone progress
-router.post('/milestones/:id/recalculate', auth, async (req, res) => {
+router.post('/milestones/:id/recalculate', authenticate, async (req, res) => {
   try {
     const milestone = await Milestone.findById(req.params.id);
     
@@ -294,7 +294,7 @@ router.post('/milestones/:id/recalculate', auth, async (req, res) => {
     
     // Check project access
     const project = await Project.findById(milestone.project_id);
-    if (!project.hasAccess(req.user.userId, 'viewer')) {
+    if (!project.hasAccess(req.user._id, 'viewer')) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
     
@@ -308,7 +308,7 @@ router.post('/milestones/:id/recalculate', auth, async (req, res) => {
 });
 
 // Delete milestone
-router.delete('/milestones/:id', auth, async (req, res) => {
+router.delete('/milestones/:id', authenticate, async (req, res) => {
   try {
     const milestone = await Milestone.findById(req.params.id);
     
@@ -318,14 +318,14 @@ router.delete('/milestones/:id', auth, async (req, res) => {
     
     // Check project access
     const project = await Project.findById(milestone.project_id);
-    if (!project.hasAccess(req.user.userId, 'admin')) {
+    if (!project.hasAccess(req.user._id, 'admin')) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
     
     // Log activity
     await ActivityLog.logActivity({
       project_id: milestone.project_id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'deleted',
       object_type: 'milestone',
       object_id: milestone._id,

@@ -3,7 +3,7 @@ import Dependency from '../models/Dependency.js';
 import Project from '../models/Project.js';
 import Task from '../models/Task.js';
 import ActivityLog from '../models/ActivityLog.js';
-import auth from '../middleware/auth.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -18,7 +18,7 @@ const checkProjectAccess = (requiredRole = 'viewer') => {
         return res.status(404).json({ error: 'Project not found' });
       }
       
-      if (!project.hasAccess(req.user.userId, requiredRole)) {
+      if (!project.hasAccess(req.user._id, requiredRole)) {
         return res.status(403).json({ error: 'Insufficient permissions' });
       }
       
@@ -31,7 +31,7 @@ const checkProjectAccess = (requiredRole = 'viewer') => {
 };
 
 // Create dependency
-router.post('/projects/:projectId/dependencies', auth, checkProjectAccess('editor'), async (req, res) => {
+router.post('/projects/:projectId/dependencies', authenticate, checkProjectAccess('editor'), async (req, res) => {
   try {
     const {
       from_task_id,
@@ -76,7 +76,7 @@ router.post('/projects/:projectId/dependencies', auth, checkProjectAccess('edito
       to_task_id,
       type: type || 'FS',
       lag: lag || 0,
-      created_by: req.user.userId
+      created_by: req.user._id
     });
     
     await dependency.save();
@@ -84,7 +84,7 @@ router.post('/projects/:projectId/dependencies', auth, checkProjectAccess('edito
     // Log activity
     await ActivityLog.logActivity({
       project_id: req.params.projectId,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'dependency_added',
       object_type: 'dependency',
       object_id: dependency._id,
@@ -106,7 +106,7 @@ router.post('/projects/:projectId/dependencies', auth, checkProjectAccess('edito
 });
 
 // Get all dependencies for a project
-router.get('/projects/:projectId/dependencies', auth, checkProjectAccess('viewer'), async (req, res) => {
+router.get('/projects/:projectId/dependencies', authenticate, checkProjectAccess('viewer'), async (req, res) => {
   try {
     const dependencies = await Dependency.find({ project_id: req.params.projectId })
       .populate('from_task_id', 'title status due_date')
@@ -119,7 +119,7 @@ router.get('/projects/:projectId/dependencies', auth, checkProjectAccess('viewer
 });
 
 // Get dependencies for a specific task
-router.get('/tasks/:taskId/dependencies', auth, async (req, res) => {
+router.get('/tasks/:taskId/dependencies', authenticate, async (req, res) => {
   try {
     const task = await Task.findById(req.params.taskId);
     
@@ -130,7 +130,7 @@ router.get('/tasks/:taskId/dependencies', auth, async (req, res) => {
     // Check project access if task has a project
     if (task.project_id) {
       const project = await Project.findById(task.project_id);
-      if (!project.hasAccess(req.user.userId, 'viewer')) {
+      if (!project.hasAccess(req.user._id, 'viewer')) {
         return res.status(403).json({ error: 'Insufficient permissions' });
       }
     }
@@ -144,7 +144,7 @@ router.get('/tasks/:taskId/dependencies', auth, async (req, res) => {
 });
 
 // Get dependency graph for visualization
-router.get('/projects/:projectId/dependencies/graph', auth, checkProjectAccess('viewer'), async (req, res) => {
+router.get('/projects/:projectId/dependencies/graph', authenticate, checkProjectAccess('viewer'), async (req, res) => {
   try {
     const dependencies = await Dependency.find({ project_id: req.params.projectId })
       .populate('from_task_id', 'title status type')
@@ -177,7 +177,7 @@ router.get('/projects/:projectId/dependencies/graph', auth, checkProjectAccess('
 });
 
 // Update dependency
-router.patch('/dependencies/:id', auth, async (req, res) => {
+router.patch('/dependencies/:id', authenticate, async (req, res) => {
   try {
     const dependency = await Dependency.findById(req.params.id);
     
@@ -187,7 +187,7 @@ router.patch('/dependencies/:id', auth, async (req, res) => {
     
     // Check project access
     const project = await Project.findById(dependency.project_id);
-    if (!project.hasAccess(req.user.userId, 'editor')) {
+    if (!project.hasAccess(req.user._id, 'editor')) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
     
@@ -207,7 +207,7 @@ router.patch('/dependencies/:id', auth, async (req, res) => {
     // Log activity
     await ActivityLog.logActivity({
       project_id: dependency.project_id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'updated',
       object_type: 'dependency',
       object_id: dependency._id,
@@ -226,7 +226,7 @@ router.patch('/dependencies/:id', auth, async (req, res) => {
 });
 
 // Delete dependency
-router.delete('/dependencies/:id', auth, async (req, res) => {
+router.delete('/dependencies/:id', authenticate, async (req, res) => {
   try {
     const dependency = await Dependency.findById(req.params.id);
     
@@ -236,14 +236,14 @@ router.delete('/dependencies/:id', auth, async (req, res) => {
     
     // Check project access
     const project = await Project.findById(dependency.project_id);
-    if (!project.hasAccess(req.user.userId, 'editor')) {
+    if (!project.hasAccess(req.user._id, 'editor')) {
       return res.status(403).json({ error: 'Insufficient permissions' });
     }
     
     // Log activity
     await ActivityLog.logActivity({
       project_id: dependency.project_id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'dependency_removed',
       object_type: 'dependency',
       object_id: dependency._id,
@@ -264,7 +264,7 @@ router.delete('/dependencies/:id', auth, async (req, res) => {
 });
 
 // Validate dependency (check for circular dependencies)
-router.post('/projects/:projectId/dependencies/validate', auth, checkProjectAccess('viewer'), async (req, res) => {
+router.post('/projects/:projectId/dependencies/validate', authenticate, checkProjectAccess('viewer'), async (req, res) => {
   try {
     const { from_task_id, to_task_id } = req.body;
     

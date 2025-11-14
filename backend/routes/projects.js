@@ -1,7 +1,7 @@
 import express from 'express';
 import Project from '../models/Project.js';
 import ActivityLog from '../models/ActivityLog.js';
-import auth from '../middleware/auth.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -15,7 +15,7 @@ const checkProjectAccess = (requiredRole = 'viewer') => {
         return res.status(404).json({ error: 'Project not found' });
       }
       
-      if (!project.hasAccess(req.user.userId, requiredRole)) {
+      if (!project.hasAccess(req.user._id, requiredRole)) {
         return res.status(403).json({ error: 'Insufficient permissions' });
       }
       
@@ -28,7 +28,7 @@ const checkProjectAccess = (requiredRole = 'viewer') => {
 };
 
 // Create new project
-router.post('/', auth, async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const {
       name,
@@ -45,12 +45,12 @@ router.post('/', auth, async (req, res) => {
       description,
       start_date,
       end_date,
-      owner_user_id: req.user.userId,
+      owner_user_id: req.user._id,
       visibility,
       timezone,
       settings,
       team_members: [{
-        user_id: req.user.userId,
+        user_id: req.user._id,
         role: 'owner'
       }]
     });
@@ -60,7 +60,7 @@ router.post('/', auth, async (req, res) => {
     // Log activity
     await ActivityLog.logActivity({
       project_id: project._id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'created',
       object_type: 'project',
       object_id: project._id,
@@ -74,14 +74,14 @@ router.post('/', auth, async (req, res) => {
 });
 
 // Get all projects for current user
-router.get('/', auth, async (req, res) => {
+router.get('/', authenticate, async (req, res) => {
   try {
     const { status, visibility } = req.query;
     
     const query = {
       $or: [
-        { owner_user_id: req.user.userId },
-        { 'team_members.user_id': req.user.userId }
+        { owner_user_id: req.user._id },
+        { 'team_members.user_id': req.user._id }
       ]
     };
     
@@ -100,7 +100,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // Get single project
-router.get('/:id', auth, checkProjectAccess('viewer'), async (req, res) => {
+router.get('/:id', authenticate, checkProjectAccess('viewer'), async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
       .populate('owner_user_id', 'name email')
@@ -113,7 +113,7 @@ router.get('/:id', auth, checkProjectAccess('viewer'), async (req, res) => {
 });
 
 // Update project
-router.patch('/:id', auth, checkProjectAccess('admin'), async (req, res) => {
+router.patch('/:id', authenticate, checkProjectAccess('admin'), async (req, res) => {
   try {
     const allowedUpdates = [
       'name', 'description', 'status', 'start_date', 'end_date',
@@ -136,7 +136,7 @@ router.patch('/:id', auth, checkProjectAccess('admin'), async (req, res) => {
     // Log activity
     await ActivityLog.logActivity({
       project_id: project._id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'updated',
       object_type: 'project',
       object_id: project._id,
@@ -150,7 +150,7 @@ router.patch('/:id', auth, checkProjectAccess('admin'), async (req, res) => {
 });
 
 // Archive project
-router.post('/:id/archive', auth, checkProjectAccess('owner'), async (req, res) => {
+router.post('/:id/archive', authenticate, checkProjectAccess('owner'), async (req, res) => {
   try {
     const project = req.project;
     const before = project.toObject();
@@ -161,7 +161,7 @@ router.post('/:id/archive', auth, checkProjectAccess('owner'), async (req, res) 
     // Log activity
     await ActivityLog.logActivity({
       project_id: project._id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'archived',
       object_type: 'project',
       object_id: project._id,
@@ -175,7 +175,7 @@ router.post('/:id/archive', auth, checkProjectAccess('owner'), async (req, res) 
 });
 
 // Add team member to project
-router.post('/:id/roles', auth, checkProjectAccess('admin'), async (req, res) => {
+router.post('/:id/roles', authenticate, checkProjectAccess('admin'), async (req, res) => {
   try {
     const { user_id, role } = req.body;
     
@@ -203,7 +203,7 @@ router.post('/:id/roles', auth, checkProjectAccess('admin'), async (req, res) =>
     // Log activity
     await ActivityLog.logActivity({
       project_id: project._id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'assigned',
       object_type: 'user',
       object_id: user_id,
@@ -217,7 +217,7 @@ router.post('/:id/roles', auth, checkProjectAccess('admin'), async (req, res) =>
 });
 
 // Remove team member from project
-router.delete('/:id/roles/:userId', auth, checkProjectAccess('admin'), async (req, res) => {
+router.delete('/:id/roles/:userId', authenticate, checkProjectAccess('admin'), async (req, res) => {
   try {
     const project = req.project;
     
@@ -235,7 +235,7 @@ router.delete('/:id/roles/:userId', auth, checkProjectAccess('admin'), async (re
     // Log activity
     await ActivityLog.logActivity({
       project_id: project._id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'deleted',
       object_type: 'user',
       object_id: req.params.userId
@@ -248,7 +248,7 @@ router.delete('/:id/roles/:userId', auth, checkProjectAccess('admin'), async (re
 });
 
 // Get project activity timeline
-router.get('/:id/activity', auth, checkProjectAccess('viewer'), async (req, res) => {
+router.get('/:id/activity', authenticate, checkProjectAccess('viewer'), async (req, res) => {
   try {
     const { limit, skip, object_type, actor_user_id, start_date, end_date } = req.query;
     
@@ -270,14 +270,14 @@ router.get('/:id/activity', auth, checkProjectAccess('viewer'), async (req, res)
 });
 
 // Delete project (hard delete - use with caution)
-router.delete('/:id', auth, checkProjectAccess('owner'), async (req, res) => {
+router.delete('/:id', authenticate, checkProjectAccess('owner'), async (req, res) => {
   try {
     const project = req.project;
     
     // Log activity before deletion
     await ActivityLog.logActivity({
       project_id: project._id,
-      actor_user_id: req.user.userId,
+      actor_user_id: req.user._id,
       action: 'deleted',
       object_type: 'project',
       object_id: project._id,

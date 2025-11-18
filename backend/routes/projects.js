@@ -76,6 +76,7 @@ router.post('/', authenticate, async (req, res) => {
 // Get all projects for current user
 router.get('/', authenticate, async (req, res) => {
   try {
+    console.log('GET /projects - User:', req.user?._id, req.user?.email);
     const { status, visibility } = req.query;
     
     const query = {
@@ -88,13 +89,17 @@ router.get('/', authenticate, async (req, res) => {
     if (status) query.status = status;
     if (visibility) query.visibility = visibility;
     
+    console.log('Query:', JSON.stringify(query));
+    
     const projects = await Project.find(query)
       .populate('owner_user_id', 'name email')
       .populate('team_members.user_id', 'name email')
       .sort({ updated_at: -1 });
     
+    console.log('Found projects:', projects.length);
     res.json(projects);
   } catch (error) {
+    console.error('GET /projects error:', error);
     res.status(500).json({ error: error.message });
   }
 });

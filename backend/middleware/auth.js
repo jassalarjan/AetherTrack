@@ -23,9 +23,12 @@ export const authenticate = async (req, res, next) => {
     const user = await User.findById(decoded.userId).select('-password_hash');
     
     if (!user) {
+      console.log('User not found for ID:', decoded.userId);
       return res.status(401).json({ message: 'User not found' });
     }
 
+    console.log('Authenticated user:', { id: user._id, email: user.email });
+    
     // Attach user to request
     req.user = user;
     next();

@@ -4,9 +4,27 @@ import { queryKeys } from '../lib/queryClient';
 
 // Project hooks
 export function useProjects(filters = {}) {
+  console.log('[useProjects] Hook called with filters:', filters);
+  
   return useQuery({
     queryKey: queryKeys.projects.list(filters),
-    queryFn: () => projectApi.getAll(filters),
+    queryFn: async () => {
+      console.log('[useProjects] Fetching projects...');
+      try {
+        const result = await projectApi.getAll(filters);
+        console.log('[useProjects] Fetch successful:', result?.length, 'projects');
+        return result;
+      } catch (error) {
+        console.error('[useProjects] Fetch failed:', error);
+        throw error;
+      }
+    },
+    onError: (error) => {
+      console.error('[useProjects] Query error:', error);
+    },
+    onSuccess: (data) => {
+      console.log('[useProjects] Query success:', data?.length, 'projects');
+    }
   });
 }
 
@@ -56,6 +74,17 @@ export function useArchiveProject() {
     mutationFn: projectApi.archive,
     onSuccess: (data, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.detail(id) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
+    },
+  });
+}
+
+export function useDeleteProject() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: projectApi.delete,
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.projects.all });
     },
   });
@@ -211,6 +240,49 @@ export function useTaskHierarchy(projectId) {
     queryKey: queryKeys.tasks.hierarchy(projectId),
     queryFn: () => taskApi.getHierarchy(projectId),
     enabled: !!projectId,
+  });
+}
+
+export function useCreateTask() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: taskApi.create,
+    onSuccess: (data) => {
+      // Invalidate project tasks
+      if (data.project_id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.list(data.project_id) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.hierarchy(data.project_id) });
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+    },
+  });
+}
+
+export function useUpdateTask() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: ({ id, updates }) => taskApi.update(id, updates),
+    onSuccess: (data) => {
+      // Invalidate project tasks
+      if (data.project_id) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.list(data.project_id) });
+        queryClient.invalidateQueries({ queryKey: queryKeys.tasks.hierarchy(data.project_id) });
+      }
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+    },
+  });
+}
+
+export function useDeleteTask() {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: taskApi.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+    },
   });
 }
 

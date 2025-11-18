@@ -24,14 +24,26 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if user is logged in
+    console.log('[AuthContext] Initializing - checking for stored user');
     const storedUser = localStorage.getItem('user');
     const token = localStorage.getItem('accessToken');
 
+    console.log('[AuthContext] Stored data:', { 
+      hasUser: !!storedUser, 
+      hasToken: !!token,
+      tokenPreview: token ? token.substring(0, 20) + '...' : null
+    });
+
     if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
-      initializeSocket(JSON.parse(storedUser).id);
+      const parsedUser = JSON.parse(storedUser);
+      console.log('[AuthContext] User found:', parsedUser);
+      setUser(parsedUser);
+      initializeSocket(parsedUser.id);
+    } else {
+      console.log('[AuthContext] No user or token found');
     }
     setLoading(false);
+    console.log('[AuthContext] Initialization complete, loading set to false');
   }, []);
 
   // Set up inactivity detection
@@ -138,8 +150,16 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      console.log('[AuthContext] Login attempt for:', email);
       const response = await api.post('/auth/login', { email, password });
       const { user, accessToken, refreshToken } = response.data;
+
+      console.log('[AuthContext] Login successful, storing user data:', {
+        userId: user.id,
+        userName: user.name,
+        userRole: user.role,
+        hasToken: !!accessToken
+      });
 
       localStorage.setItem('user', JSON.stringify(user));
       localStorage.setItem('accessToken', accessToken);
@@ -148,8 +168,10 @@ export const AuthProvider = ({ children }) => {
       setUser(user);
       initializeSocket(user.id);
 
+      console.log('[AuthContext] User state set, login complete');
       return { success: true };
     } catch (error) {
+      console.error('[AuthContext] Login failed:', error.response?.data || error.message);
       return {
         success: false,
         message: error.response?.data?.message || 'Login failed',
@@ -184,6 +206,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    console.log('[AuthContext] Logout called');
+    console.trace('[AuthContext] Logout stack trace');
     localStorage.removeItem('user');
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
@@ -193,6 +217,7 @@ export const AuthProvider = ({ children }) => {
       socket.disconnect();
       setSocket(null);
     }
+    console.log('[AuthContext] Logout complete');
   };
 
   const value = {

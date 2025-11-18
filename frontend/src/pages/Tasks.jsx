@@ -40,12 +40,15 @@ const Tasks = () => {
     due_date: '',
     team_id: '',
     assigned_to: [],
+    project_id: '', // REQUIRED - Task must belong to a project
   });
   const [users, setUsers] = useState([]);
   const [teams, setTeams] = useState([]);
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
     fetchTasks();
+    fetchProjects(); // Fetch projects for all users
     if (['admin', 'hr', 'team_lead'].includes(user?.role)) {
       fetchUsers();
       fetchTeams();
@@ -180,8 +183,24 @@ const Tasks = () => {
     }
   };
 
+  const fetchProjects = async () => {
+    try {
+      const response = await api.get('/projects');
+      setProjects(response.data || []);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    }
+  };
+
   const handleCreateTask = async (e) => {
     e.preventDefault();
+    
+    // Validate project is selected
+    if (!formData.project_id) {
+      alert('Please select a project. All tasks must belong to a project.');
+      return;
+    }
+    
     try {
       await api.post('/tasks', formData);
       setShowCreateModal(false);
@@ -193,6 +212,7 @@ const Tasks = () => {
         due_date: '',
         team_id: '',
         assigned_to: [],
+        project_id: '',
       });
       fetchTasks();
     } catch (error) {
@@ -684,6 +704,12 @@ const Tasks = () => {
               </div>
 
               <div className="space-y-2 mb-4">
+                {task.project_id && (
+                  <div className={`text-sm ${currentTheme.textSecondary}`}>
+                    <span className="font-medium">📁 Project:</span> {typeof task.project_id === 'object' ? task.project_id.name : projects.find(p => p._id === task.project_id)?.name || 'Unknown'}
+                  </div>
+                )}
+
                 {task.assigned_to && task.assigned_to.length > 0 && (
                   <div className={`text-sm ${currentTheme.textSecondary}`}>
                     <span className="font-medium">👥 Assigned:</span> {task.assigned_to.map(u => u.full_name).join(', ')}
@@ -740,6 +766,23 @@ const Tasks = () => {
             </div>
 
             <form onSubmit={handleEditTask} className="space-y-4">
+              {/* Project Display - Read-only */}
+              <div>
+                <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
+                  Project
+                </label>
+                <input
+                  type="text"
+                  value={projects.find(p => p._id === editingTask.project_id)?.name || 'No project assigned'}
+                  className="input bg-gray-100 cursor-not-allowed"
+                  disabled
+                  readOnly
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Project cannot be changed after task creation
+                </p>
+              </div>
+
               <div>
                 <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
                   Title *
@@ -900,6 +943,30 @@ const Tasks = () => {
             </div>
 
             <form onSubmit={handleCreateTask} className="space-y-4">
+              {/* Project Selection - REQUIRED */}
+              <div>
+                <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
+                  Project *
+                </label>
+                <select
+                  value={formData.project_id}
+                  onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}
+                  className="input"
+                  required
+                  data-testid="task-project-select"
+                >
+                  <option value="">Select a project...</option>
+                  {projects.map((project) => (
+                    <option key={project._id} value={project._id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  All tasks must belong to a project
+                </p>
+              </div>
+
               <div>
                 <label className={`block text-sm font-medium ${currentTheme.text} mb-2`}>
                   Title *

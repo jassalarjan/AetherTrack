@@ -1,8 +1,109 @@
-import { X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Save, Trash2 } from 'lucide-react';
 import { useProjectStore } from '../../stores/projectStore';
+import { useProjects, useCreateTask, useUpdateTask, useDeleteTask } from '../../hooks/useProjects';
 
 export default function TaskEditorPanel() {
-  const { taskEditorOpen, taskEditorMode, taskEditorData, closeTaskEditor } = useProjectStore();
+  const { 
+    taskEditorOpen, 
+    taskEditorMode, 
+    taskEditorData, 
+    closeTaskEditor,
+    currentProject 
+  } = useProjectStore();
+  
+  const { data: projects = [] } = useProjects();
+  const createTask = useCreateTask();
+  const updateTask = useUpdateTask();
+  const deleteTask = useDeleteTask();
+
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    status: 'todo',
+    priority: 'medium',
+    type: 'task',
+    start_date: '',
+    due_date: '',
+    estimate_hours: 0,
+    project_id: '',
+    parent_id: null,
+  });
+
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Initialize form data when editor opens
+  useEffect(() => {
+    if (taskEditorOpen) {
+      if (taskEditorMode === 'edit' && taskEditorData) {
+        setFormData({
+          title: taskEditorData.title || '',
+          description: taskEditorData.description || '',
+          status: taskEditorData.status || 'todo',
+          priority: taskEditorData.priority || 'medium',
+          type: taskEditorData.type || 'task',
+          start_date: taskEditorData.start_date ? new Date(taskEditorData.start_date).toISOString().split('T')[0] : '',
+          due_date: taskEditorData.due_date ? new Date(taskEditorData.due_date).toISOString().split('T')[0] : '',
+          estimate_hours: taskEditorData.estimate_hours || 0,
+          project_id: taskEditorData.project_id || currentProject?._id || '',
+          parent_id: taskEditorData.parent_id || null,
+        });
+      } else {
+        // Create mode - set defaults
+        setFormData({
+          title: '',
+          description: '',
+          status: taskEditorData?.status || 'todo',
+          priority: 'medium',
+          type: 'task',
+          start_date: '',
+          due_date: taskEditorData?.due_date ? new Date(taskEditorData.due_date).toISOString().split('T')[0] : '',
+          estimate_hours: 0,
+          project_id: taskEditorData?.project_id || currentProject?._id || '',
+          parent_id: null,
+        });
+      }
+    }
+  }, [taskEditorOpen, taskEditorMode, taskEditorData, currentProject]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!formData.title.trim()) {
+      alert('Please enter a task title');
+      return;
+    }
+
+    if (!formData.project_id) {
+      alert('Please select a project');
+      return;
+    }
+
+    try {
+      if (taskEditorMode === 'create') {
+        await createTask.mutateAsync(formData);
+      } else {
+        await updateTask.mutateAsync({
+          id: taskEditorData._id,
+          updates: formData,
+        });
+      }
+      closeTaskEditor();
+    } catch (error) {
+      console.error('Failed to save task:', error);
+      alert('Failed to save task. Please try again.');
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteTask.mutateAsync(taskEditorData._id);
+      closeTaskEditor();
+    } catch (error) {
+      console.error('Failed to delete task:', error);
+      alert('Failed to delete task. Please try again.');
+    }
+  };
 
   if (!taskEditorOpen) return null;
 
@@ -27,16 +128,44 @@ export default function TaskEditorPanel() {
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-6">
-            <form className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-6" id="task-form">
+              {/* Project Selection - REQUIRED */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Project *
+                </label>
+                <select
+                  value={formData.project_id}
+                  onChange={(e) => setFormData({ ...formData, project_id: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
+                  disabled={taskEditorMode === 'edit'} // Can't change project after creation
+                >
+                  <option value="">Select a project...</option>
+                  {projects.map((project) => (
+                    <option key={project._id} value={project._id}>
+                      {project.name}
+                    </option>
+                  ))}
+                </select>
+                {taskEditorMode === 'edit' && (
+                  <p className="text-xs text-gray-500 mt-1">
+                    Project cannot be changed after task creation
+                  </p>
+                )}
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Task Title *
                 </label>
                 <input
                   type="text"
-                  defaultValue={taskEditorData?.title || ''}
+                  value={formData.title}
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter task title..."
+                  required
                 />
               </div>
 
@@ -45,7 +174,8 @@ export default function TaskEditorPanel() {
                   Description
                 </label>
                 <textarea
-                  defaultValue={taskEditorData?.description || ''}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={4}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   placeholder="Add task description..."
@@ -58,7 +188,8 @@ export default function TaskEditorPanel() {
                     Status
                   </label>
                   <select
-                    defaultValue={taskEditorData?.status || 'todo'}
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="todo">To Do</option>
@@ -73,9 +204,12 @@ export default function TaskEditorPanel() {
                     Priority
                   </label>
                   <select
-                    defaultValue={taskEditorData?.priority || 'medium'}
+                    value={formData.priority}
+                    onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
                     <option value="high">High</option>
@@ -89,7 +223,8 @@ export default function TaskEditorPanel() {
                   Type
                 </label>
                 <select
-                  defaultValue={taskEditorData?.type || 'task'}
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="epic">Epic</option>
@@ -105,18 +240,20 @@ export default function TaskEditorPanel() {
                   </label>
                   <input
                     type="date"
-                    defaultValue={taskEditorData?.start_date ? new Date(taskEditorData.start_date).toISOString().split('T')[0] : ''}
+                    value={formData.start_date}
+                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Due Date *
+                    Due Date
                   </label>
                   <input
                     type="date"
-                    defaultValue={taskEditorData?.due_date ? new Date(taskEditorData.due_date).toISOString().split('T')[0] : ''}
+                    value={formData.due_date}
+                    onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -128,7 +265,8 @@ export default function TaskEditorPanel() {
                 </label>
                 <input
                   type="number"
-                  defaultValue={taskEditorData?.estimate_hours || 0}
+                  value={formData.estimate_hours}
+                  onChange={(e) => setFormData({ ...formData, estimate_hours: parseFloat(e.target.value) || 0 })}
                   min="0"
                   step="0.5"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -138,19 +276,65 @@ export default function TaskEditorPanel() {
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t flex justify-end gap-3">
-            <button
-              onClick={closeTaskEditor}
-              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={closeTaskEditor}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              {taskEditorMode === 'create' ? 'Create Task' : 'Save Changes'}
-            </button>
+          <div className="px-6 py-4 border-t flex justify-between">
+            <div>
+              {taskEditorMode === 'edit' && (
+                <>
+                  {!showDeleteConfirm ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowDeleteConfirm(true)}
+                      className="inline-flex items-center px-4 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      Delete
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-gray-600">Are you sure?</span>
+                      <button
+                        type="button"
+                        onClick={handleDelete}
+                        className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                        disabled={deleteTask.isPending}
+                      >
+                        {deleteTask.isPending ? 'Deleting...' : 'Yes, Delete'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowDeleteConfirm(false)}
+                        className="px-3 py-1 text-sm border border-gray-300 rounded hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={closeTaskEditor}
+                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                form="task-form"
+                disabled={createTask.isPending || updateTask.isPending}
+                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {createTask.isPending || updateTask.isPending
+                  ? 'Saving...'
+                  : taskEditorMode === 'create'
+                  ? 'Create Task'
+                  : 'Save Changes'}
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, Grid, List } from 'lucide-react';
+import { Plus, Search, Filter, Grid, List, CheckSquare } from 'lucide-react';
 import Navbar from '../../components/Navbar';
 import { useProjects, useCreateProject } from '../../hooks/useProjects';
 import { useProjectStore } from '../../stores/projectStore';
+import TaskEditorPanel from '../../components/shared/TaskEditorPanel';
 
 export default function ProjectsList() {
   const navigate = useNavigate();
@@ -11,10 +12,32 @@ export default function ProjectsList() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [viewMode, setViewMode] = useState('grid'); // grid or list
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const { openTaskEditor } = useProjectStore();
+
+  console.log('[ProjectsList] Component rendering');
 
   const filters = statusFilter !== 'all' ? { status: statusFilter } : {};
-  const { data: projects = [], isLoading } = useProjects(filters);
+  const { data: projects = [], isLoading, error, isFetching } = useProjects(filters);
   const createProject = useCreateProject();
+
+  useEffect(() => {
+    console.log('[ProjectsList] State changed:', { 
+      isLoading, 
+      isFetching,
+      hasError: !!error, 
+      projectsCount: projects?.length,
+      error: error?.message 
+    });
+  }, [isLoading, isFetching, error, projects]);
+
+  console.log('[ProjectsList] Current state:', { 
+    isLoading, 
+    isFetching,
+    hasError: !!error, 
+    projectsCount: projects?.length,
+    searchTerm,
+    statusFilter
+  });
 
   const filteredProjects = projects.filter(project =>
     project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -31,6 +54,26 @@ export default function ProjectsList() {
     }
   };
 
+  if (error) {
+    console.error('Projects page error:', error);
+    return (
+      <Navbar>
+        <div className="flex items-center justify-center h-screen">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Error Loading Projects</h2>
+            <p className="text-gray-600 mb-4">{error.message || 'Failed to load projects'}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      </Navbar>
+    );
+  }
+
   return (
     <Navbar>
       <div className="min-h-screen bg-gray-50">
@@ -45,13 +88,22 @@ export default function ProjectsList() {
                   Manage your project workspaces
                 </p>
               </div>
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
-              >
-                <Plus className="h-5 w-5 mr-2" />
-                New Project
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => openTaskEditor()}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  <CheckSquare className="h-5 w-5 mr-2" />
+                  New Task
+                </button>
+                <button
+                  onClick={() => setShowCreateModal(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  New Project
+                </button>
+              </div>
             </div>
 
             {/* Filters and Search */}
@@ -139,6 +191,9 @@ export default function ProjectsList() {
           isLoading={createProject.isPending}
         />
       )}
+
+      {/* Task Editor Panel */}
+      <TaskEditorPanel />
       </div>
     </Navbar>
   );

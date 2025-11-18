@@ -2,7 +2,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 import useNotifications from './hooks/useNotifications';
@@ -22,13 +22,23 @@ import ChangeLog from './pages/ChangeLog';
 import ColorPreview from './pages/ColorPreview';
 import ProjectsList from './pages/projects/ProjectsList';
 import ProjectDetail from './pages/projects/ProjectDetail';
+import ProjectSettings from './pages/projects/ProjectSettings';
+
+// Separate component to ensure hooks are called within AuthProvider
+function NotificationManager() {
+  useNotifications();
+  return null;
+}
 
 function AppContent() {
-  // Initialize notifications
-  useNotifications();
+  const { user } = useAuth();
 
   return (
-    <Routes>
+    <>
+      {/* Only initialize notifications when user is logged in */}
+      {user && <NotificationManager />}
+      
+      <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
 
@@ -159,8 +169,18 @@ function AppContent() {
         }
       />
 
+      <Route
+        path="/projects/:id/settings"
+        element={
+          <ProtectedRoute>
+            <ProjectSettings />
+          </ProtectedRoute>
+        }
+      />
+
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
     </Routes>
+    </>
   );
 }
 

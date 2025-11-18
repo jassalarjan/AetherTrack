@@ -1,7 +1,7 @@
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Bell, LogOut, LayoutDashboard, CheckSquare, Users, UserCog, Kanban, Menu, X, ChevronLeft, ChevronRight, BarChart3, Settings, Calendar as CalendarIcon, Activity, User, ClipboardList, FolderKanban } from 'lucide-react';
+import { Bell, LogOut, LayoutDashboard, CheckSquare, Users, UserCog, Kanban, Menu, X, ChevronLeft, ChevronRight, BarChart3, Settings, Calendar as CalendarIcon, Activity, User, ClipboardList, FolderKanban, ChevronDown, LayoutGrid, Table, Calendar, GanttChart } from 'lucide-react';
 import Avatar from './Avatar';
 import { useState, useEffect } from 'react';
 import api from '../api/axios';
@@ -16,6 +16,9 @@ const Navbar = ({ children }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showProjectsDropdown, setShowProjectsDropdown] = useState(false);
+  const [showTasksDropdown, setShowTasksDropdown] = useState(false);
+  const [showHRDropdown, setShowHRDropdown] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -75,24 +78,26 @@ const Navbar = ({ children }) => {
       href: '/projects',
       icon: FolderKanban,
       roles: ['admin', 'hr', 'team_lead', 'member'],
+      hasDropdown: true,
+      subItems: [
+        { name: 'All Projects', href: '/projects', icon: FolderKanban },
+        { name: 'Kanban View', href: '#', icon: LayoutGrid, isViewOption: true },
+        { name: 'Grid View', href: '#', icon: Table, isViewOption: true },
+        { name: 'Calendar View', href: '#', icon: Calendar, isViewOption: true },
+        { name: 'Timeline View', href: '#', icon: GanttChart, isViewOption: true },
+      ],
     },
     {
       name: 'Tasks',
       href: '/tasks',
       icon: CheckSquare,
       roles: ['admin', 'hr', 'team_lead', 'member'],
-    },
-    {
-      name: 'Kanban',
-      href: '/kanban',
-      icon: Kanban,
-      roles: ['admin', 'hr', 'team_lead', 'member'],
-    },
-    {
-      name: 'Calendar',
-      href: '/calendar',
-      icon: CalendarIcon,
-      roles: ['admin', 'hr', 'team_lead', 'member'],
+      hasDropdown: true,
+      subItems: [
+        { name: 'All Tasks', href: '/tasks', icon: CheckSquare },
+        { name: 'Kanban Board', href: '/kanban', icon: Kanban },
+        { name: 'Calendar', href: '/calendar', icon: CalendarIcon },
+      ],
     },
     {
       name: 'Analytics',
@@ -105,6 +110,13 @@ const Navbar = ({ children }) => {
       href: '/hr-management',
       icon: ClipboardList,
       roles: ['admin', 'hr'],
+      hasDropdown: true,
+      subItems: [
+        { name: 'Dashboard', href: '/hr-management', icon: ClipboardList },
+        { name: 'User Management', href: '/users', icon: UserCog },
+        { name: 'Teams', href: '/teams', icon: Users },
+        { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+      ],
     },
     {
       name: 'My Analytics',
@@ -116,13 +128,7 @@ const Navbar = ({ children }) => {
       name: 'Teams',
       href: '/teams',
       icon: Users,
-      roles: ['admin', 'hr', 'team_lead'],
-    },
-    {
-      name: 'User Management',
-      href: '/users',
-      icon: UserCog,
-      roles: ['admin', 'hr'],
+      roles: ['team_lead'], // Only team_lead sees standalone Teams
     },
     {
       name: 'ChangeLog',
@@ -223,12 +229,92 @@ const Navbar = ({ children }) => {
               .filter(item => item.roles.includes(user?.role))
               .map((item) => {
                 const Icon = item.icon;
+                const isItemActive = isActive(item.href);
+                
+                // Handle dropdown items
+                if (item.hasDropdown && !isCollapsed) {
+                  const isDropdownOpen = item.name === 'Projects' ? showProjectsDropdown : 
+                                        item.name === 'Tasks' ? showTasksDropdown :
+                                        item.name === 'HR Management' ? showHRDropdown : false;
+                  const pathPrefix = item.name === 'Projects' ? '/projects' : 
+                                    item.name === 'Tasks' ? '/tasks' :
+                                    item.name === 'HR Management' ? '/hr' : '';
+                  
+                  return (
+                    <div key={item.name} className="space-y-1">
+                      <button
+                        onClick={() => {
+                          if (item.name === 'Projects') {
+                            setShowProjectsDropdown(!showProjectsDropdown);
+                          } else if (item.name === 'Tasks') {
+                            setShowTasksDropdown(!showTasksDropdown);
+                          } else if (item.name === 'HR Management') {
+                            setShowHRDropdown(!showHRDropdown);
+                          }
+                        }}
+                        className={`w-full flex items-center justify-between px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
+                          isItemActive || location.pathname.startsWith(pathPrefix) || 
+                          (item.name === 'HR Management' && (location.pathname.startsWith('/users') || location.pathname.startsWith('/teams') || location.pathname.startsWith('/hr')))
+                            ? `${currentColorScheme.primaryLight} ${currentColorScheme.primaryText} border-r-4 ${primaryBorderClass}`
+                            : `${currentTheme.textSecondary} ${currentTheme.hover} hover:${currentTheme.text}`
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          <Icon className={`w-5 h-5 mr-3 flex-shrink-0 transition-colors ${
+                            isItemActive || location.pathname.startsWith(pathPrefix) ? currentColorScheme.primaryText : currentTheme.textMuted
+                          }`} />
+                          <span>{item.name}</span>
+                        </div>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${
+                          isDropdownOpen ? 'rotate-180' : ''
+                        }`} />
+                      </button>
+                      
+                      {/* Dropdown menu */}
+                      {isDropdownOpen && (
+                        <div className="ml-4 pl-4 border-l-2 border-gray-300 space-y-1">
+                          {item.subItems.map((subItem) => {
+                            const SubIcon = subItem.icon;
+                            return (
+                              <Link
+                                key={subItem.name}
+                                to={subItem.href}
+                                onClick={() => {
+                                  if (subItem.isViewOption) {
+                                    // These are view options, shown for information
+                                    // Actual view switching happens in ProjectDetail
+                                  }
+                                  setIsMobileMenuOpen(false);
+                                }}
+                                className={`flex items-center px-3 py-2 text-sm rounded-lg transition-colors ${
+                                  subItem.isViewOption
+                                    ? `${currentTheme.textMuted} cursor-default`
+                                    : isActive(subItem.href)
+                                    ? `${currentColorScheme.primaryLight} ${currentColorScheme.primaryText}`
+                                    : `${currentTheme.textSecondary} ${currentTheme.hover} hover:${currentTheme.text}`
+                                }`}
+                              >
+                                <SubIcon className="w-4 h-4 mr-2" />
+                                <span>{subItem.name}</span>
+                                {subItem.isViewOption && (
+                                  <span className="ml-auto text-xs opacity-60">(in project)</span>
+                                )}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+                
+                // Regular navigation items
                 return (
                   <Link
                     key={item.name}
                     to={item.href}
                     className={`w-full flex items-center ${isCollapsed ? 'px-2 py-3 justify-center' : 'px-4 py-3'} text-sm font-medium rounded-lg transition-all duration-200 ${
-                      isActive(item.href)
+                      isItemActive
                         ? `${currentColorScheme.primaryLight} ${currentColorScheme.primaryText} border-r-4 ${primaryBorderClass}`
                         : `${currentTheme.textSecondary} ${currentTheme.hover} hover:${currentTheme.text}`
                     }`}
@@ -237,7 +323,7 @@ const Navbar = ({ children }) => {
                     title={isCollapsed ? item.name : ''}
                   >
                     <Icon className={`${isCollapsed ? 'w-6 h-6 flex-shrink-0' : 'w-5 h-5 mr-3 flex-shrink-0'} transition-colors ${
-                      isActive(item.href) ? currentColorScheme.primaryText : currentTheme.textMuted
+                      isItemActive ? currentColorScheme.primaryText : currentTheme.textMuted
                     }`} />
                     {!isCollapsed && <span>{item.name}</span>}
                   </Link>

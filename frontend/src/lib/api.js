@@ -13,7 +13,12 @@ const api = axios.create({
 
 // Add token to requests
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+  console.log('[API] Request:', config.method?.toUpperCase(), config.url, {
+    hasToken: !!token,
+    tokenPreview: token ? token.substring(0, 20) + '...' : null,
+    headers: config.headers
+  });
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -22,11 +27,31 @@ api.interceptors.request.use((config) => {
 
 // Handle response errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log('[API] Response:', response.config.method?.toUpperCase(), response.config.url, {
+      status: response.status,
+      data: response.data
+    });
+    return response;
+  },
   (error) => {
+    console.error('[API] Error:', error.config?.method?.toUpperCase(), error.config?.url, {
+      status: error.response?.status,
+      message: error.response?.data?.message,
+      error: error.message
+    });
+    
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Only redirect if it's not a token issue during initial load
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+      if (!token || error.response?.data?.message?.includes('Invalid') || error.response?.data?.message?.includes('expired')) {
+        console.error('[API] 🚨 Authentication failed, redirecting to login:', error.response?.data?.message);
+        localStorage.removeItem('token');
+        localStorage.removeItem('accessToken');
+        window.location.href = '/login';
+      } else {
+        console.warn('[API] ⚠️ 401 error but token exists, not redirecting:', error.response?.data);
+      }
     }
     return Promise.reject(error);
   }
@@ -36,14 +61,28 @@ api.interceptors.response.use(
 export const projectApi = {
   // Get all projects
   getAll: async (filters = {}) => {
-    const { data } = await api.get('/projects', { params: filters });
-    return data;
+    console.log('[projectApi.getAll] Called with filters:', filters);
+    try {
+      const { data } = await api.get('/projects', { params: filters });
+      console.log('[projectApi.getAll] Response received:', data?.length, 'projects');
+      return data;
+    } catch (error) {
+      console.error('[projectApi.getAll] Request failed:', error.response?.status, error.message);
+      throw error;
+    }
   },
 
   // Get single project
   getById: async (id) => {
-    const { data } = await api.get(`/projects/${id}`);
-    return data;
+    console.log('[projectApi.getById] Called with id:', id);
+    try {
+      const { data } = await api.get(`/projects/${id}`);
+      console.log('[projectApi.getById] Response received:', data?._id);
+      return data;
+    } catch (error) {
+      console.error('[projectApi.getById] Request failed:', error.response?.status, error.message);
+      throw error;
+    }
   },
 
   // Create project
@@ -220,7 +259,8 @@ export const taskApi = {
     const { data } = await api.get('/tasks', { 
       params: { project_id: projectId, ...filters } 
     });
-    return data;
+    // Backend returns { tasks: [], count: number }
+    return data.tasks || data;
   },
 
   // Get task hierarchy
@@ -228,6 +268,25 @@ export const taskApi = {
     const { data } = await api.get('/tasks', {
       params: { project_id: projectId, include_hierarchy: true }
     });
+    // Backend returns { tasks: [], count: number }
+    return data.tasks || data;
+  },
+
+  // Create task
+  create: async (taskData) => {
+    const { data } = await api.post('/tasks', taskData);
+    return data;
+  },
+
+  // Update task
+  update: async (id, updates) => {
+    const { data } = await api.put(`/tasks/${id}`, updates);
+    return data;
+  },
+
+  // Delete task
+  delete: async (id) => {
+    const { data } = await api.delete(`/tasks/${id}`);
     return data;
   },
 

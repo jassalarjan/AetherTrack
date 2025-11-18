@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import useRealtimeSync from '../hooks/useRealtimeSync';
 import Navbar from '../components/Navbar';
 import {
   User,
@@ -62,6 +63,9 @@ const HRManagement = () => {
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date(), 'yyyy-MM-dd'));
   const [viewingMonth, setViewingMonth] = useState(new Date());
 
+  // Enable real-time sync for tasks and users
+  const { lastUpdate } = useRealtimeSync();
+
   // Attendance status options
   const attendanceStatuses = [
     { value: 'present', label: 'Present', icon: UserCheck, color: 'emerald', bgColor: 'bg-emerald-100 dark:bg-emerald-900/30', textColor: 'text-emerald-700 dark:text-emerald-400' },
@@ -74,6 +78,20 @@ const HRManagement = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Refetch data when real-time updates occur
+  useEffect(() => {
+    if (lastUpdate) {
+      fetchData();
+    }
+  }, [lastUpdate]);
+
+  // Recalculate stats whenever users or tasks change
+  useEffect(() => {
+    if (users.length > 0 && tasks.length > 0) {
+      calculateUserStats(users, tasks);
+    }
+  }, [users, tasks]);
 
   const fetchData = async () => {
     try {
@@ -113,29 +131,51 @@ const HRManagement = () => {
 
     // Ensure usersData is an array
     if (!Array.isArray(usersData) || !Array.isArray(tasksData)) {
+      console.log('Invalid data:', { usersData: Array.isArray(usersData), tasksData: Array.isArray(tasksData) });
       return;
     }
 
+    console.log('Calculating stats for:', usersData.length, 'users and', tasksData.length, 'tasks');
+
     usersData.forEach(user => {
-      const userTasks = tasksData.filter(task => 
-        task.assignedTo?._id === user._id || task.assignedTo === user._id
-      );
+      // Filter tasks assigned to this user
+      // Handle both assigned_to (array, snake_case) and assignedTo (single, camelCase)
+      const userTasks = tasksData.filter(task => {
+        // Check assigned_to array (backend uses this)
+        if (Array.isArray(task.assigned_to)) {
+          return task.assigned_to.some(assignee => {
+            const assigneeId = typeof assignee === 'object' ? assignee._id : assignee;
+            return assigneeId?.toString() === user._id?.toString();
+          });
+        }
+        // Check assignedTo (might be used in some responses)
+        if (task.assignedTo) {
+          const assigneeId = typeof task.assignedTo === 'object' ? task.assignedTo._id : task.assignedTo;
+          return assigneeId?.toString() === user._id?.toString();
+        }
+        return false;
+      });
+
+      console.log(`User ${user.name} has ${userTasks.length} tasks`);
 
       const completedTasks = userTasks.filter(task => task.status === 'completed');
-      const inProgressTasks = userTasks.filter(task => task.status === 'in-progress');
+      const inProgressTasks = userTasks.filter(task => task.status === 'in-progress' || task.status === 'in_progress');
       const todoTasks = userTasks.filter(task => task.status === 'todo');
-      const overdueTasks = userTasks.filter(task => 
-        task.status !== 'completed' && new Date(task.dueDate) < new Date()
-      );
+      const overdueTasks = userTasks.filter(task => {
+        const dueDate = task.dueDate || task.due_date;
+        return task.status !== 'completed' && dueDate && new Date(dueDate) < new Date();
+      });
 
       const completionRate = userTasks.length > 0 
         ? ((completedTasks.length / userTasks.length) * 100).toFixed(1)
         : 0;
 
       // Calculate productivity score
-      const onTimeTasks = completedTasks.filter(task => 
-        new Date(task.updatedAt) <= new Date(task.dueDate)
-      ).length;
+      const onTimeTasks = completedTasks.filter(task => {
+        const updatedAt = task.updatedAt || task.updated_at;
+        const dueDate = task.dueDate || task.due_date;
+        return updatedAt && dueDate && new Date(updatedAt) <= new Date(dueDate);
+      }).length;
 
       const productivityScore = userTasks.length > 0
         ? (
@@ -147,11 +187,15 @@ const HRManagement = () => {
         : 0;
 
       // Calculate average completion time
-      const completedWithDates = completedTasks.filter(task => task.createdAt && task.updatedAt);
+      const completedWithDates = completedTasks.filter(task => {
+        const createdAt = task.createdAt || task.created_at;
+        const updatedAt = task.updatedAt || task.updated_at;
+        return createdAt && updatedAt;
+      });
       const avgCompletionTime = completedWithDates.length > 0
         ? completedWithDates.reduce((sum, task) => {
-            const created = new Date(task.createdAt);
-            const completed = new Date(task.updatedAt);
+            const created = new Date(task.createdAt || task.created_at);
+            const completed = new Date(task.updatedAt || task.updated_at);
             return sum + (completed - created) / (1000 * 60 * 60 * 24); // days
           }, 0) / completedWithDates.length
         : 0;
@@ -171,6 +215,7 @@ const HRManagement = () => {
       };
     });
 
+    console.log('Calculated user stats:', stats);
     setUserStats(stats);
   };
 

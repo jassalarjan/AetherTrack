@@ -69,6 +69,9 @@ export default defineConfig(({ mode }) => {
         },
         workbox: {
           globPatterns: ['**/*.{js,css,html,ico,png,svg,woff,woff2}'],
+          navigateFallback: '/index.html',
+          navigateFallbackAllowlist: [/^(?!\/(api|socket\.io)).*/],
+          navigateFallbackDenylist: [/^\/api/, /^\/socket\.io/],
           runtimeCaching: [
             {
               urlPattern: /^https:\/\/api\./i,

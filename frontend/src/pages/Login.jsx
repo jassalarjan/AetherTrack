@@ -95,8 +95,7 @@ const Login = () => {
           <div className="animate-fade-in-down">
             <div className="flex items-center gap-3 mb-8">
               <div className="bg-white/20 backdrop-blur-lg p-3 rounded-2xl border border-white/30 shadow-2xl">
-                <Sparkles className="w-8 h-8 text-white" />
-              </div>
+<img className="w-20 h-20 border-rounded-full" src="/logo.png" alt="" />              </div>
               <div>
                 <h1 className="text-4xl font-bold tracking-tight">AetherTrack</h1>
                 <p className="text-blue-100 text-sm mt-1">Elevate Your Productivity</p>
